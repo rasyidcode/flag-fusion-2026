@@ -3,10 +3,11 @@ import { FLAGS } from "../config";
 import { getRadiusByRank } from "../utils";
 
 export class FlagRenderer {
-    private scene: Scene;
+    scene: Scene;
 
     constructor(scene: Scene) {
         this.scene = scene;
+        this.initAllCircularTexture();
     }
 
     initAllCircularTexture() {

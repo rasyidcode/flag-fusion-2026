@@ -37,9 +37,8 @@ export class Game extends Scene {
         this.matter.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT, 32, true, true, true, true);
 
         this.flagRenderer = new FlagRenderer(this);
-        this.flagRenderer?.initAllCircularTexture();
 
-        this.spawnFlag(GAME_WIDTH / 2 - 18);
+        this.spawnFlag(null);
 
         // move the flag based on pointer.x position
         this.input.on('pointermove', (pointer: Input.Pointer) => {
@@ -60,9 +59,13 @@ export class Game extends Scene {
         });
     }
 
-    spawnFlag(spawnX: number) {
+    spawnFlag(posX: number | null) {
         const randomFlag = getRandomFlag();
         const radius = getRadiusByRank(randomFlag.rank);
+        let spawnX = GAME_WIDTH / 2 - radius;
+        if (posX != null) {
+            spawnX = posX;
+        }
         const flag = this.flagRenderer?.createFlag(spawnX, 100, radius, randomFlag.code);
         // @ts-ignore
         flag?.setStatic(true);
