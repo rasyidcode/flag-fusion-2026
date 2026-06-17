@@ -1,13 +1,17 @@
 import { GameObjects, Input, Scene, Math as PhaserMath } from "phaser";
-import { FLAGS, GAME_HEIGHT, GAME_WIDTH } from "../config";
+import { DROP_Y, FLAGS, GAME_HEIGHT, GAME_WIDTH } from "../config";
 import { FlagRenderer } from "../visuals/FlagRenderer";
 import { getRadiusByRank, getRandomFlag } from "../utils";
+import type { Flag } from "../types";
 
 export class Game extends Scene {
 
     private flagRenderer: FlagRenderer | null;
 
-    private currentFlag: GameObjects.Image | null;
+    private currentFlag: Flag | null;
+
+    private currentFlagObject: GameObjects.Image | null;
+
 
     //private canDrop: boolean;
 
@@ -16,6 +20,7 @@ export class Game extends Scene {
 
         this.flagRenderer = null;
         this.currentFlag = null;
+        this.currentFlagObject = null;
         //this.canDrop = true;
     }
 
@@ -37,21 +42,16 @@ export class Game extends Scene {
 
         // move the flag based on pointer.x position
         this.input.on('pointermove', (pointer: Input.Pointer) => {
-            if (!this.currentFlag) return;
-
-            const clampedX = PhaserMath.Clamp(
-                pointer.x,
-                18,
-                GAME_WIDTH - 18
-            )
-            this.currentFlag?.setPosition(clampedX, 100);
+            this.moveCurrentFlag(pointer.x);
         });
 
         // drop the flag
         this.input.on('pointerdown', (pointer: Input.Pointer) => {
             // @ts-ignore
-            this.currentFlag?.setStatic(false);
+            this.currentFlagObject?.setStatic(false);
+
             this.currentFlag = null;
+            this.currentFlagObject = null;
 
             this.time.delayedCall(1000, () => {
                 this.spawnFlag(pointer.x);
@@ -66,8 +66,21 @@ export class Game extends Scene {
         // @ts-ignore
         flag?.setStatic(true);
 
-        this.currentFlag = flag ?? null;
+        this.currentFlag = randomFlag;
+        this.currentFlagObject = flag ?? null;
         //this.canDrop = true;
+    }
+
+    private moveCurrentFlag(rawX: number) {
+        if (!this.currentFlag || !this.currentFlagObject) return;
+
+        const radius = getRadiusByRank(this.currentFlag.rank);
+        const clampedX = PhaserMath.Clamp(
+            rawX,
+            radius,
+            GAME_WIDTH - radius
+        )
+        this.currentFlagObject.setPosition(clampedX, DROP_Y);
     }
 
 }
