@@ -6,22 +6,23 @@ import type { Flag } from "../types";
 
 export class Game extends Scene {
 
-    private flagRenderer: FlagRenderer | null;
+    flagRenderer: FlagRenderer | null = null;
 
-    private currentFlag: Flag | null;
+    currentFlag: Flag | null = null;
 
-    private currentFlagObject: GameObjects.Image | null;
+    currentFlagObject: GameObjects.Image | null = null;
 
-
-    //private canDrop: boolean;
+    canDrop: boolean = false;
 
     constructor() {
         super('Game');
+    }
 
+    init() {
         this.flagRenderer = null;
         this.currentFlag = null;
         this.currentFlagObject = null;
-        //this.canDrop = true;
+        this.canDrop = true;
     }
 
     preload() {
@@ -59,7 +60,7 @@ export class Game extends Scene {
         });
     }
 
-    private spawnFlag(spawnX: number) {
+    spawnFlag(spawnX: number) {
         const randomFlag = getRandomFlag();
         const radius = getRadiusByRank(randomFlag.rank);
         const flag = this.flagRenderer?.createFlag(spawnX, 100, radius, randomFlag.code);
