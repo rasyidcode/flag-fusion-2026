@@ -33,18 +33,19 @@ export class Game extends Scene {
 
         this.spawnBall();
 
-        // move the flag based on pointer.x position
+        // move the ball based on pointer.x position
         this.input.on('pointermove', (pointer: Input.Pointer) => {
             this.moveCurrentBall(pointer.x);
         });
 
-        // drop the flag
+        // drop the ball
         this.input.on('pointerdown', (pointer: Input.Pointer) => {
             if (!this.currentBall) return;
 
             this.currentBall.drop();
 
-            // reset the flag
+            // reset the ball
+            this.currentBall.destroy()
             this.currentBall = null;
 
             this.time.delayedCall(1000, () => {
@@ -52,7 +53,7 @@ export class Game extends Scene {
             });
         });
 
-        // check collision between flags
+        // check collision between balls
         this.matter.world.on('collisionstart', (event: Physics.Matter.Events.CollisionStartEvent) => {
             for (const pair of event.pairs) {
                 const a = pair.bodyA.gameObject;
