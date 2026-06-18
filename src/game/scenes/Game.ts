@@ -1,4 +1,4 @@
-import { GameObjects, Input, Scene, Math as PhaserMath } from "phaser";
+import { GameObjects, Input, Scene, Math as PhaserMath, Physics } from "phaser";
 import { DROP_Y, FLAGS, GAME_HEIGHT, GAME_WIDTH } from "../config";
 import { FlagRenderer } from "../visuals/FlagRenderer";
 import { getRadiusByRank, getRandomFlag } from "../utils";
@@ -22,14 +22,39 @@ export class Game extends Scene {
         this.flagRenderer = null;
         this.currentFlag = null;
         this.currentFlagObject = null;
-        this.canDrop = true;
     }
 
     preload() {
         this.load.setPath('assets');
 
+        // load all flags image
         FLAGS.forEach((flag) => {
             this.load.image(flag.code, `flags/${flag.code}.png`);
+        });
+
+        // create canvas texture for each flags
+        FLAGS.forEach((flag) => {
+            const radius = getRadiusByRank(flag.rank);
+            const diameter = radius * 2;
+            const key = `flag-circle-${flag.code}`;
+            const canvasTexture = this.textures.createCanvas(key, diameter, diameter);
+            if (canvasTexture) {
+                const ctx = canvasTexture?.context;
+
+                if (ctx) {
+                    ctx.beginPath();
+                    ctx.arc(radius, radius, radius, 0, Math.PI * 2);
+                    ctx.closePath();
+                    ctx.clip();
+
+                    const flagImage = this.textures.get(flag.code).getSourceImage() as HTMLImageElement;
+                    if (flagImage) {
+                        ctx.drawImage(flagImage, 0, 0, flagImage.width, flagImage.height, 0, 0, diameter, diameter);
+                    }
+
+                    canvasTexture.refresh();
+                }
+            }
         });
     }
 
@@ -47,17 +72,32 @@ export class Game extends Scene {
 
         // drop the flag
         this.input.on('pointerdown', (pointer: Input.Pointer) => {
-            // @ts-ignore
-            this.currentFlagObject?.setStatic(false);
+            if (!this.currentFlag || !this.currentFlagObject) return;
 
+            // @ts-ignore
+            this.currentFlagObject?.setStatic(false); // drop the flag
+
+            // reset the flag
             this.currentFlag = null;
             this.currentFlagObject = null;
 
             this.time.delayedCall(1000, () => {
                 this.spawnFlag(pointer.x);
-            })
+            });
+        });
+
+        // check collision between flags
+        this.matter.world.on('collisionstart', (event: Physics.Matter.Events.CollisionStartEvent) => {
+            for (const pair of event.pairs) {
+                const a = pair.bodyA.gameObject;
+                const b = pair.bodyB.gameObject;
+
+                console.log('Game Object A: ', a);
+                console.log('Game Object B: ', b);
+            }
         });
     }
+
 
     spawnFlag(posX: number | null) {
         const randomFlag = getRandomFlag();
@@ -72,7 +112,6 @@ export class Game extends Scene {
 
         this.currentFlag = randomFlag;
         this.currentFlagObject = flag ?? null;
-        //this.canDrop = true;
     }
 
     private moveCurrentFlag(rawX: number) {
