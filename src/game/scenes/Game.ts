@@ -1,14 +1,9 @@
-import { GameObjects, Input, Scene, Math as PhaserMath, Physics } from "phaser";
+import { Input, Scene, Math as PhaserMath, Physics } from "phaser";
 import { DROP_Y, FLAGS, GAME_HEIGHT, GAME_WIDTH } from "../config";
-import { getRadiusByRank, getRandomFlagTexture } from "../utils";
-import type { Flag } from "../types";
+import { getRadiusByRank, getRandomFlag } from "../utils";
 import { Ball } from "../gameobjects/Ball";
 
 export class Game extends Scene {
-
-    currentFlag: Flag | null = null;
-
-    currentFlagObject: GameObjects.Image | null = null;
 
     canDrop: boolean = false;
 
@@ -19,8 +14,6 @@ export class Game extends Scene {
     }
 
     init() {
-        this.currentFlag = null;
-        this.currentFlagObject = null;
         this.currentBall = null;
     }
 
@@ -38,31 +31,24 @@ export class Game extends Scene {
 
         this.initBallTexture();
 
-        // console.log(this.textures.exists('flag-circle-cw'));
-
         this.spawnBall();
-
-        // this.matter.add.image(0, 0, 'cw');
-        // this.textures.createCanvas
 
         // move the flag based on pointer.x position
         this.input.on('pointermove', (pointer: Input.Pointer) => {
-            this.moveCurrentFlag(pointer.x);
+            this.moveCurrentBall(pointer.x);
         });
 
         // drop the flag
         this.input.on('pointerdown', (pointer: Input.Pointer) => {
-            if (!this.currentFlag || !this.currentFlagObject) return;
+            if (!this.currentBall) return;
 
-            // @ts-ignore
-            this.currentFlagObject?.setStatic(false); // drop the flag
+            this.currentBall.drop();
 
             // reset the flag
-            this.currentFlag = null;
-            this.currentFlagObject = null;
+            this.currentBall = null;
 
             this.time.delayedCall(1000, () => {
-                // this.spawnFlag(pointer.x);
+                this.spawnBall(pointer.x);
             });
         });
 
@@ -105,43 +91,29 @@ export class Game extends Scene {
         });
     }
 
-    spawnBall() {
-        const randomFlagTexture = getRandomFlagTexture();
+    spawnBall(rawX?: number) {
+        const randomFlag = getRandomFlag();
+        const radius = getRadiusByRank(randomFlag.rank);
         this.currentBall = new Ball(
             this,
-            GAME_WIDTH / 2,
+            rawX ?? GAME_WIDTH / 2 - radius,
             DROP_Y,
-            // `flag-circle-${randomFlagTexture.code}`,
-            'pts',
-            18
+            `flag-circle-${randomFlag.code}`,
+            radius,
+            randomFlag
         );
     }
 
-    // spawnFlag(posX: number | null) {
-    //     const randomFlag = getRandomFlag();
-    //     const radius = getRadiusByRank(randomFlag.rank);
-    //     let spawnX = GAME_WIDTH / 2 - radius;
-    //     if (posX != null) {
-    //         spawnX = posX;
-    //     }
-    //     const flag = this.flagRenderer?.createFlag(spawnX, 100, radius, randomFlag.code);
-    //     // @ts-ignore
-    //     flag?.setStatic(true);
+    moveCurrentBall(rawX: number) {
+        if (!this.currentBall) return;
 
-    //     this.currentFlag = randomFlag;
-    //     this.currentFlagObject = flag ?? null;
-    // }
-
-    moveCurrentFlag(rawX: number) {
-        if (!this.currentFlag || !this.currentFlagObject) return;
-
-        const radius = getRadiusByRank(this.currentFlag.rank);
+        const radius = getRadiusByRank(this.currentBall.flag.rank);
         const clampedX = PhaserMath.Clamp(
             rawX,
             radius,
             GAME_WIDTH - radius
         )
-        this.currentFlagObject.setPosition(clampedX, DROP_Y);
+        this.currentBall.setPosition(clampedX, DROP_Y);
     }
 
 }

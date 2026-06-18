@@ -8,7 +8,7 @@ export const getRadiusByRank = (rank: number) => {
     
 }
 
-export const getRandomFlagTexture = () => {
+export const getRandomFlag = () => {
     const dropPoolSize = 5;
     const randomIndex = Math.floor(Math.random() * dropPoolSize);
     return FLAGS[randomIndex];
