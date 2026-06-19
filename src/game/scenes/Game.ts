@@ -1,4 +1,4 @@
-import { Input, Scene, Physics, Math as PhaserMath, GameObjects } from "phaser";
+import { Input, Scene, Physics, Math as PhaserMath, GameObjects, Display, Geom } from "phaser";
 import { DROP_Y, FLAGS, GAME_HEIGHT, GAME_WIDTH } from "../config";
 import { getRadiusByRank } from "../utils";
 import { Ball } from "../gameobjects/Ball";
@@ -6,9 +6,9 @@ import type { Flag } from "../types";
 
 export class Game extends Scene {
 
-    canDrop: boolean = false;
-
     currentBall: GameObjects.Image | null = null;
+
+    canDrop: boolean = true;
 
     constructor() {
         super('Game');
@@ -16,6 +16,7 @@ export class Game extends Scene {
 
     init() {
         this.currentBall = null;
+        this.canDrop = true;
     }
 
     preload() {
@@ -31,6 +32,7 @@ export class Game extends Scene {
         this.matter.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT, 32, true, true, true, true);
 
         this.initBallTexture();
+        this.generateParticleTexture();
 
         this.spawnBall();
 
@@ -49,7 +51,7 @@ export class Game extends Scene {
 
         // drop the ball
         this.input.on('pointerdown', (pointer: Input.Pointer) => {
-            if (!this.currentBall) return;
+            if (!this.currentBall || !this.canDrop) return;
 
             const x = this.currentBall.x;
             const y = this.currentBall.y;
@@ -58,11 +60,13 @@ export class Game extends Scene {
 
             this.currentBall.destroy();
             this.currentBall = null;
+            this.canDrop = false;
 
             new Ball(this, x, y, `flag-circle-${flag.code}`, radius, flag);
 
-            this.time.delayedCall(1000, () => {
+            this.time.delayedCall(550, () => {
                 this.spawnBall(pointer.x);
+                this.canDrop = true;
             });
         });
 
@@ -79,6 +83,22 @@ export class Game extends Scene {
                 }
             }
         });
+
+    }
+
+    generateParticleTexture() {
+        const size = 12;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.arc(6, 6, 6, 0, Math.PI * 2);
+            ctx.fill();
+            this.textures.addCanvas('particle', canvas);
+        }
     }
 
     initBallTexture() {
@@ -111,6 +131,7 @@ export class Game extends Scene {
     spawnBall(rawX?: number) {
         // get random flag between rank 1 - 5
         const randomFlag = FLAGS[PhaserMath.Between(0, 4)];
+        // const randomFlag = FLAGS[0];
         const radius = getRadiusByRank(randomFlag.rank);
 
         this.currentBall = this.add.image(
@@ -130,6 +151,9 @@ export class Game extends Scene {
         a.destroy();
         b.destroy();
 
+        // create particles
+        this.createMergeParticles(x, y, a.flag.color, b.flag.color);
+
         const newFlag = FLAGS.find((flag) => flag.rank === newRank);
         if (newFlag) {
             const newRadius = getRadiusByRank(newFlag.rank);
@@ -142,6 +166,46 @@ export class Game extends Scene {
                 newFlag
             );
         }
+    }
+
+    createMergeParticles(x: number, y: number, colorA: string, colorB: string) {
+        if (!this.textures.exists('particle-dot')) {
+            const canvas = this.textures.createCanvas('particle-dot', 4, 4);
+            if (canvas) {
+                const ctx = canvas.context;
+                if (ctx) {
+                    ctx.fillStyle = '#ffffff';
+
+                    // circle
+                    ctx.beginPath();
+                    ctx.arc(2, 2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // rectangle
+                    // ctx.fillRect(0, 0, 4, 4);
+                    canvas.refresh();
+                }
+            }
+        }
+
+        // const combinedColors = [
+        //     Display.Color.HexStringToColor(colorA).color,
+        //     Display.Color.HexStringToColor(colorB).color
+        // ];
+        const emitter = this.add.particles(x, y, "particle-dot", {
+            speed: { min: 80, max: 200 },
+            scale: { start: 1, end: 0 },
+            // tint: combinedColors,
+            lifespan: 700,
+            blendMode: "ADD",
+            maxParticles: 16,
+            gravityY: 150,
+        });
+        emitter.setDepth(5);
+
+        this.time.delayedCall(700, () => {
+            emitter.destroy();
+        });
     }
 
 }

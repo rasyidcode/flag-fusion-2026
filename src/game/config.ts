@@ -24,7 +24,7 @@ export const FLAGS: Flag[] = [
     "id": "nz",
     "code": "nz",
     "name": "New Zealand",
-    "color": "#000000",
+    "color": "#00008B",
     "rank": 3,
   },
   {
