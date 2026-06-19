@@ -45,15 +45,6 @@ export class Game extends Scene {
                 GAME_WIDTH - radius
             )
             this.currentBall.setX(clampedX);
-
-            // if (!this.currentBall) return;
-
-            // this.currentBall.move(
-            //     pointer.x,
-            //     this.currentBall.radius,
-            //     GAME_WIDTH - this.currentBall.radius,
-            //     DROP_Y
-            // );
         });
 
         // drop the ball
@@ -68,12 +59,6 @@ export class Game extends Scene {
             this.currentBall.destroy();
 
             new Ball(this, x, y, `flag-circle-${flag.code}`, radius, flag);
-
-            // enable physics to drop the ball
-            // this.currentBall.setStatic(false);
-
-            // reset the current ball
-            // this.currentBall = null;
 
             this.time.delayedCall(1000, () => {
                 this.spawnBall(pointer.x);
@@ -134,15 +119,6 @@ export class Game extends Scene {
         );
         this.currentBall.setData('flag', randomFlag);
         this.currentBall.setData('radius', radius);
-        // this.currentBall = new Ball(
-        //     this,
-        //     rawX ?? GAME_WIDTH / 2 - radius,
-        //     DROP_Y,
-        //     `flag-circle-${randomFlag.code}`,
-        //     radius,
-        //     randomFlag
-        // );
-        // this.currentBall.setStatic(true);
     }
 
     mergeBalls(a: Ball, b: Ball) {
