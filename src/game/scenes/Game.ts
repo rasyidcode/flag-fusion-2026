@@ -152,7 +152,7 @@ export class Game extends Scene {
         b.destroy();
 
         // create particles
-        this.createMergeParticles(x, y, a.flag.color, b.flag.color);
+        this.createMergeParticles(x, y);
 
         const newFlag = FLAGS.find((flag) => flag.rank === newRank);
         if (newFlag) {
@@ -168,7 +168,7 @@ export class Game extends Scene {
         }
     }
 
-    createMergeParticles(x: number, y: number, colorA: string, colorB: string) {
+    createMergeParticles(x: number, y: number) {
         if (!this.textures.exists('particle-dot')) {
             const canvas = this.textures.createCanvas('particle-dot', 4, 4);
             if (canvas) {
@@ -188,14 +188,9 @@ export class Game extends Scene {
             }
         }
 
-        // const combinedColors = [
-        //     Display.Color.HexStringToColor(colorA).color,
-        //     Display.Color.HexStringToColor(colorB).color
-        // ];
         const emitter = this.add.particles(x, y, "particle-dot", {
             speed: { min: 80, max: 200 },
             scale: { start: 1, end: 0 },
-            // tint: combinedColors,
             lifespan: 700,
             blendMode: "ADD",
             maxParticles: 16,
