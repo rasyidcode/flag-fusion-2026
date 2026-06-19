@@ -29,7 +29,15 @@ export class Game extends Scene {
     }
 
     create() {
-        this.matter.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT, 32, true, true, true, true);
+        this.matter.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT, 32, true, true, true, true);        // Visual stadium border bounds
+
+        const borderGraphics = this.add.graphics();
+        borderGraphics.lineStyle(4, 0x4f46e5, 0.4); // Neon blue/purple border
+        borderGraphics.strokeRect(20, 120, 440, 560);
+
+        // Draw the floor line visually
+        borderGraphics.lineStyle(4, 0x10b981, 0.8); // Green pitch outline line at floor
+        borderGraphics.strokeLineShape(new Geom.Line(20, 680, 460, 680));
 
         this.initBallTexture();
         this.generateParticleTexture();
@@ -152,23 +160,26 @@ export class Game extends Scene {
         b.destroy();
 
         // create particles
-        this.createMergeParticles(x, y, () => {
-            const newFlag = FLAGS.find((flag) => flag.rank === newRank);
-            if (newFlag) {
-                const newRadius = getRadiusByRank(newFlag.rank);
-                new Ball(
-                    this,
-                    x,
-                    y,
-                    `flag-circle-${newFlag?.code}`,
-                    newRadius,
-                    newFlag
-                );
-            }
-        });
+        this.createMergeParticles(x, y);
+
+        const newFlag = FLAGS.find((flag) => flag.rank === newRank);
+        if (newFlag) {
+            const newRadius = getRadiusByRank(newFlag.rank);
+            const mergedBall = new Ball(
+                this,
+                x,
+                y,
+                `flag-circle-${newFlag?.code}`,
+                newRadius,
+                newFlag
+            );
+            mergedBall.setBounce(0.25);
+            mergedBall.setFriction(0.02, 0.01, 0.05);
+            mergedBall.setDensity(0.005 * newFlag.rank);
+        }
     }
 
-    createMergeParticles(x: number, y: number, callback: () => void) {
+    createMergeParticles(x: number, y: number) {
         if (!this.textures.exists('particle-dot')) {
             const canvas = this.textures.createCanvas('particle-dot', 4, 4);
             if (canvas) {
@@ -200,11 +211,7 @@ export class Game extends Scene {
 
         this.time.delayedCall(700, () => {
             emitter.destroy();
-
         });
-        this.time.delayedCall(150, () => {
-            callback();
-        })
     }
 
 }

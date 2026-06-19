@@ -20,6 +20,11 @@ export class Ball extends Physics.Matter.Image {
                 type: 'circle',
                 radius: radius
             },
+            restitution: 0.25,
+            friction: 0.02,
+            frictionAir: 0.01,
+            frictionStatic: 0.05,
+            density: 0.005 * flag.rank,
         });
 
         this.flag = flag;
