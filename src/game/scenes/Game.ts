@@ -1,13 +1,14 @@
-import { Input, Scene, Math as PhaserMath, Physics } from "phaser";
+import { Input, Scene, Physics, Math as PhaserMath, GameObjects } from "phaser";
 import { DROP_Y, FLAGS, GAME_HEIGHT, GAME_WIDTH } from "../config";
-import { getRadiusByRank, getRandomFlag } from "../utils";
+import { getRadiusByRank } from "../utils";
 import { Ball } from "../gameobjects/Ball";
+import type { Flag } from "../types";
 
 export class Game extends Scene {
 
     canDrop: boolean = false;
 
-    currentBall: Ball | null = null;
+    currentBall: GameObjects.Image | null = null;
 
     constructor() {
         super('Game');
@@ -35,18 +36,44 @@ export class Game extends Scene {
 
         // move the ball based on pointer.x position
         this.input.on('pointermove', (pointer: Input.Pointer) => {
-            this.moveCurrentBall(pointer.x);
+            if (!this.currentBall) return;
+
+            const radius = this.currentBall.getData('radius') as number;
+            const clampedX = PhaserMath.Clamp(
+                pointer.x,
+                radius,
+                GAME_WIDTH - radius
+            )
+            this.currentBall.setX(clampedX);
+
+            // if (!this.currentBall) return;
+
+            // this.currentBall.move(
+            //     pointer.x,
+            //     this.currentBall.radius,
+            //     GAME_WIDTH - this.currentBall.radius,
+            //     DROP_Y
+            // );
         });
 
         // drop the ball
         this.input.on('pointerdown', (pointer: Input.Pointer) => {
             if (!this.currentBall) return;
 
-            this.currentBall.drop();
+            const x = this.currentBall.x;
+            const y = this.currentBall.y;
+            const flag = this.currentBall.getData('flag') as Flag;
+            const radius = this.currentBall.getData('radius') as number;
 
-            // reset the ball
-            this.currentBall.destroy()
-            this.currentBall = null;
+            this.currentBall.destroy();
+
+            new Ball(this, x, y, `flag-circle-${flag.code}`, radius, flag);
+
+            // enable physics to drop the ball
+            // this.currentBall.setStatic(false);
+
+            // reset the current ball
+            // this.currentBall = null;
 
             this.time.delayedCall(1000, () => {
                 this.spawnBall(pointer.x);
@@ -59,8 +86,11 @@ export class Game extends Scene {
                 const a = pair.bodyA.gameObject;
                 const b = pair.bodyB.gameObject;
 
-                console.log('Game Object A: ', a);
-                console.log('Game Object B: ', b);
+                if (a instanceof Ball && b instanceof Ball) {
+                    if (a.flag.rank === b.flag.rank) {
+                        this.mergeBalls(a, b);
+                    }
+                }
             }
         });
     }
@@ -93,28 +123,48 @@ export class Game extends Scene {
     }
 
     spawnBall(rawX?: number) {
-        const randomFlag = getRandomFlag();
+        // get random flag between rank 1 - 5
+        const randomFlag = FLAGS[PhaserMath.Between(0, 4)];
         const radius = getRadiusByRank(randomFlag.rank);
-        this.currentBall = new Ball(
-            this,
+
+        this.currentBall= this.add.image(
             rawX ?? GAME_WIDTH / 2 - radius,
             DROP_Y,
-            `flag-circle-${randomFlag.code}`,
-            radius,
-            randomFlag
+            `flag-circle-${randomFlag.code}`
         );
+        this.currentBall.setData('flag', randomFlag);
+        this.currentBall.setData('radius', radius);
+        // this.currentBall = new Ball(
+        //     this,
+        //     rawX ?? GAME_WIDTH / 2 - radius,
+        //     DROP_Y,
+        //     `flag-circle-${randomFlag.code}`,
+        //     radius,
+        //     randomFlag
+        // );
+        // this.currentBall.setStatic(true);
     }
 
-    moveCurrentBall(rawX: number) {
-        if (!this.currentBall) return;
+    mergeBalls(a: Ball, b: Ball) {
+        const newRank = a.flag.rank + 1;
+        const x = (a.x + b.x) / 2;
+        const y = (a.y + b.y) / 2;
 
-        const radius = getRadiusByRank(this.currentBall.flag.rank);
-        const clampedX = PhaserMath.Clamp(
-            rawX,
-            radius,
-            GAME_WIDTH - radius
-        )
-        this.currentBall.setPosition(clampedX, DROP_Y);
+        a.destroy();
+        b.destroy();
+
+        const newFlag = FLAGS.find((flag) => flag.rank === newRank);
+        if (newFlag) {
+            const newRadius = getRadiusByRank(newFlag.rank);
+            new Ball(
+                this,
+                x,
+                y,
+                `flag-circle-${newFlag?.code}`,
+                newRadius,
+                newFlag
+            );
+        }
     }
 
 }

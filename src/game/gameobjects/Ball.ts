@@ -26,11 +26,6 @@ export class Ball extends Physics.Matter.Image {
         this.radius = radius;
 
         this.scene.add.existing(this);
-        this.setStatic(true);
-    }
-
-    drop() {
-        this.setStatic(false);
     }
 
 }
