@@ -57,6 +57,7 @@ export class Game extends Scene {
             const radius = this.currentBall.getData('radius') as number;
 
             this.currentBall.destroy();
+            this.currentBall = null;
 
             new Ball(this, x, y, `flag-circle-${flag.code}`, radius, flag);
 
@@ -112,7 +113,7 @@ export class Game extends Scene {
         const randomFlag = FLAGS[PhaserMath.Between(0, 4)];
         const radius = getRadiusByRank(randomFlag.rank);
 
-        this.currentBall= this.add.image(
+        this.currentBall = this.add.image(
             rawX ?? GAME_WIDTH / 2 - radius,
             DROP_Y,
             `flag-circle-${randomFlag.code}`
