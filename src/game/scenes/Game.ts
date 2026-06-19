@@ -152,23 +152,23 @@ export class Game extends Scene {
         b.destroy();
 
         // create particles
-        this.createMergeParticles(x, y);
-
-        const newFlag = FLAGS.find((flag) => flag.rank === newRank);
-        if (newFlag) {
-            const newRadius = getRadiusByRank(newFlag.rank);
-            new Ball(
-                this,
-                x,
-                y,
-                `flag-circle-${newFlag?.code}`,
-                newRadius,
-                newFlag
-            );
-        }
+        this.createMergeParticles(x, y, () => {
+            const newFlag = FLAGS.find((flag) => flag.rank === newRank);
+            if (newFlag) {
+                const newRadius = getRadiusByRank(newFlag.rank);
+                new Ball(
+                    this,
+                    x,
+                    y,
+                    `flag-circle-${newFlag?.code}`,
+                    newRadius,
+                    newFlag
+                );
+            }
+        });
     }
 
-    createMergeParticles(x: number, y: number) {
+    createMergeParticles(x: number, y: number, callback: () => void) {
         if (!this.textures.exists('particle-dot')) {
             const canvas = this.textures.createCanvas('particle-dot', 4, 4);
             if (canvas) {
@@ -200,7 +200,11 @@ export class Game extends Scene {
 
         this.time.delayedCall(700, () => {
             emitter.destroy();
+
         });
+        this.time.delayedCall(150, () => {
+            callback();
+        })
     }
 
 }
