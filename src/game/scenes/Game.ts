@@ -31,13 +31,16 @@ export class Game extends Scene {
     create() {
         this.matter.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT, 32, true, true, true, true);        // Visual stadium border bounds
 
-        const borderGraphics = this.add.graphics();
-        borderGraphics.lineStyle(4, 0x4f46e5, 0.4); // Neon blue/purple border
-        borderGraphics.strokeRect(20, 120, 440, 560);
+        // const borderGraphics = this.add.graphics();
+        // borderGraphics.lineStyle(4, 0x4f46e5, 0.4); // Neon blue/purple border
+        // borderGraphics.strokeRect(20, 120, 440, 560);
 
         // Draw the floor line visually
-        borderGraphics.lineStyle(4, 0x10b981, 0.8); // Green pitch outline line at floor
-        borderGraphics.strokeLineShape(new Geom.Line(20, 680, 460, 680));
+        // borderGraphics.lineStyle(4, 0x10b981, 0.8); // Green pitch outline line at floor
+        // borderGraphics.strokeLineShape(new Geom.Line(20, 680, 460, 680));
+
+        this.createContainer();
+        // this.createContainer2(30, 150, GAME_WIDTH - 60, 550);
 
         this.initBallTexture();
         this.generateParticleTexture();
@@ -212,6 +215,161 @@ export class Game extends Scene {
         this.time.delayedCall(700, () => {
             emitter.destroy();
         });
+    }
+
+    createContainer() {
+        const x = 30;
+        const y = 150;
+        const width = GAME_WIDTH - 60;
+        const height = 550;
+        const g = this.add.graphics();
+
+        const radius = 8;
+        const wallThickness = 6;
+
+        // Glass fill
+        g.fillStyle(0xffffff, 0.15);
+        g.fillRoundedRect(x, y, width, height, radius);
+
+        // Glass border
+        g.lineStyle(wallThickness, 0xffffff, 0.4);
+
+        // Left wall
+        g.beginPath();
+        g.moveTo(x, y);
+        g.lineTo(x, y + height - radius);
+        g.arc(
+            x + radius,
+            y + height - radius,
+            radius,
+            Math.PI,
+            Math.PI / 2,
+            true
+        );
+        g.strokePath();
+
+        // Bottom
+        g.beginPath();
+        g.moveTo(x + radius, y + height);
+        g.lineTo(x + width - radius, y + height);
+        g.strokePath();
+
+        // Right wall
+        g.beginPath();
+        g.moveTo(x + width, y);
+        g.lineTo(x + width, y + height - radius);
+        g.arc(
+            x + width - radius,
+            y + height - radius,
+            radius,
+            0,
+            Math.PI / 2
+        );
+        g.strokePath();
+
+        // Back left line
+        g.beginPath();
+        g.moveTo(75, 120); // 120 - 660 = 540
+        g.lineTo(75, 660); // 540 + 120 = 660
+        g.strokePath();
+
+        // // Optional highlights
+        // g.lineStyle(2, 0xffffff, 0.25);
+        // g.beginPath();
+        // g.moveTo(x + 15, y + 20);
+        // g.lineTo(x + 15, y + height - 40);
+        // g.strokePath();
+
+        // g.beginPath();
+        // g.moveTo(x + 25, y + 20);
+        // g.lineTo(x + 25, y + height - 60);
+        // g.strokePath();
+
+        return g;
+    }
+
+    createContainer2(x: number, y: number, width: number, height: number) {
+        const g = this.add.graphics();
+
+        const depth = 18;
+        const radius = 20;
+
+        // Right side
+        g.fillStyle(0xffffff, 0.08);
+        g.beginPath();
+        g.moveTo(x + width, y);
+        g.lineTo(x + width + depth, y - depth);
+        g.lineTo(x + width + depth, y + height - depth);
+        g.lineTo(x + width, y + height);
+        g.closePath();
+        g.fillPath();
+
+        // Bottom side
+        g.fillStyle(0xffffff, 0.06);
+        g.beginPath();
+        g.moveTo(x, y + height);
+        g.lineTo(x + width, y + height);
+        g.lineTo(x + width + depth, y + height - depth);
+        g.lineTo(x + depth, y + height - depth);
+        g.closePath();
+        g.fillPath();
+
+        // Front glass
+        g.fillStyle(0xffffff, 0.15);
+        g.fillRoundedRect(x, y, width, height, radius);
+
+        // Front borders
+        g.lineStyle(6, 0xffffff, 0.4);
+
+        // Left wall
+        g.beginPath();
+        g.moveTo(x, y);
+        g.lineTo(x, y + height - radius);
+        g.arc(x + radius, y + height - radius, radius, Math.PI, Math.PI / 2, true);
+        g.strokePath();
+
+        // Bottom
+        g.beginPath();
+        g.moveTo(x + radius, y + height);
+        g.lineTo(x + width - radius, y + height);
+        g.strokePath();
+
+        // Right wall
+        g.beginPath();
+        g.moveTo(x + width, y);
+        g.lineTo(x + width, y + height - radius);
+        g.arc(x + width - radius, y + height - radius, radius, 0, Math.PI / 2);
+        g.strokePath();
+
+        // Right depth border
+        g.lineStyle(4, 0xffffff, 0.2);
+
+        g.beginPath();
+        g.moveTo(x + width, y);
+        g.lineTo(x + width + depth, y - depth);
+        g.lineTo(x + width + depth, y + height - depth);
+        g.strokePath();
+
+        // Bottom depth border
+        g.beginPath();
+        g.moveTo(x, y + height);
+        g.lineTo(x + depth, y + height - depth);
+        g.lineTo(x + width + depth, y + height - depth);
+        g.strokePath();
+
+        // Glass reflection
+        g.lineStyle(3, 0xffffff, 0.2);
+        g.beginPath();
+        g.moveTo(x + 20, y + 30);
+        g.lineTo(x + 20, y + height - 50);
+        g.strokePath();
+
+        g.beginPath();
+        g.moveTo(x + 35, y + 40);
+        g.lineTo(x + 35, y + height - 80);
+        g.strokePath();
+
+        return g;
     }
 
 }

@@ -12,6 +12,7 @@ const config: Types.Core.GameConfig = {
     //     mode: Scale.FIT,
     //     autoCenter: Scale.CENTER_BOTH
     // },
+    transparent: true,
     physics: {
         default: 'matter',
         matter: {
