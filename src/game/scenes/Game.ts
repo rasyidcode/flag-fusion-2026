@@ -39,8 +39,9 @@ export class Game extends Scene {
         // borderGraphics.lineStyle(4, 0x10b981, 0.8); // Green pitch outline line at floor
         // borderGraphics.strokeLineShape(new Geom.Line(20, 680, 460, 680));
 
-        this.createContainer();
+        // this.createContainer();
         // this.createContainer2(30, 150, GAME_WIDTH - 60, 550);
+        this.drawGlassContainer();
 
         this.initBallTexture();
         this.generateParticleTexture();
@@ -268,10 +269,22 @@ export class Game extends Scene {
         g.strokePath();
 
         // Back left line
-        g.beginPath();
-        g.moveTo(75, 120); // 120 - 660 = 540
-        g.lineTo(75, 660); // 540 + 120 = 660
-        g.strokePath();
+        // g.beginPath();
+        // g.moveTo(75, 120);
+        // g.lineTo(75, 670);
+        // g.arc(
+        //     75,
+        //     670,
+        //     radius,
+        //     -1,
+        //     Math.PI / 3
+        // );
+        // g.strokePath();
+
+        // g.beginPath();
+        // g.moveTo(30, 700);
+        // g.lineTo(75, 670);
+        // g.strokePath();
 
         // // Optional highlights
         // g.lineStyle(2, 0xffffff, 0.25);
@@ -367,6 +380,224 @@ export class Game extends Scene {
         g.beginPath();
         g.moveTo(x + 35, y + 40);
         g.lineTo(x + 35, y + height - 80);
+        g.strokePath();
+
+        return g;
+    }
+
+    drawQuad(
+        g: GameObjects.Graphics,
+        color: number,
+        p1: { x: number, y: number },
+        p2: { x: number, y: number },
+        p3: { x: number, y: number },
+        p4: { x: number, y: number }
+    ) {
+        g.fillStyle(color);
+
+        g.beginPath();
+
+        g.moveTo(p1.x, p1.y);
+        g.lineTo(p2.x, p2.y);
+        g.lineTo(p3.x, p3.y);
+        g.lineTo(p4.x, p4.y);
+
+        g.closePath();
+        g.fillPath();
+    }
+
+    drawContainer() {
+        const x = 30;
+        const y = 150;
+        const width = GAME_WIDTH - 60;
+        const height = 550;
+        const g = this.add.graphics();
+
+        const depth = 40;
+
+        // Colors
+        const frontColor = 0xEEDFB3;
+        const sideColor = 0xD8C07D;
+        const floorColor = 0xDDD098;
+        const rimColor = 0xE7D38B;
+        const openingColor = 0xF5E6BE;
+
+        const left = x;
+        const right = x + width;
+        const top = y;
+        const bottom = y + height;
+
+        //
+        // Front face
+        //
+        g.fillStyle(frontColor);
+        g.fillRect(left, top, width, height);
+
+        //
+        // Left side
+        //
+        this.drawQuad(
+            g,
+            sideColor,
+            { x: left, y: top },
+            { x: left + depth, y: top - depth },
+            { x: left + depth, y: bottom - depth },
+            { x: left, y: bottom }
+        );
+
+        //
+        // Right side
+        //
+        this.drawQuad(
+            g,
+            sideColor,
+            { x: right, y: top },
+            { x: right - depth, y: top - depth },
+            { x: right - depth, y: bottom - depth },
+            { x: right, y: bottom }
+        );
+
+        //
+        // Floor
+        //
+        this.drawQuad(
+            g,
+            floorColor,
+            { x: left, y: bottom },
+            { x: right, y: bottom },
+            { x: right - depth, y: bottom - depth },
+            { x: left + depth, y: bottom - depth }
+        );
+
+        //
+        // Top rim
+        //
+        this.drawQuad(
+            g,
+            rimColor,
+            { x: left, y: top },
+            { x: right, y: top },
+            { x: right - depth, y: top - depth },
+            { x: left + depth, y: top - depth }
+        );
+
+        //
+        // Inner opening
+        //
+        g.fillStyle(openingColor);
+        g.fillRect(
+            left + depth,
+            top - depth,
+            width - depth * 2,
+            depth
+        );
+
+        return g;
+    }
+
+    drawGlassContainer() {
+        const g = this.add.graphics();
+        const x = 30;
+        const y = 150;
+        const width = GAME_WIDTH - 60;
+        const height = 550;
+        const thickness = 18;
+        const depth = 40;
+
+        //
+        // Shadow
+        //
+        g.fillStyle(0x000000, 0.15);
+        g.fillRoundedRect(
+            x - 8,
+            y + 8,
+            width + 16,
+            height + 16,
+            12
+        );
+
+        //
+        // Main glass body
+        //
+        g.fillStyle(0xffffff, 0.25);
+        g.fillRoundedRect(x, y, width, height, 8);
+
+        //
+        // Bottom tint
+        //
+        g.fillStyle(0xaec8ff, 0.2);
+        g.fillRect(
+            x,
+            y + height - 60,
+            width,
+            60
+        );
+
+        //
+        // Left wall
+        //
+        g.fillStyle(0xffffff, 0.15);
+
+        g.beginPath();
+        g.moveTo(x, y);
+        g.lineTo(x + depth, y - depth);
+        g.lineTo(x + depth, y + height - depth);
+        g.lineTo(x, y + height);
+        g.closePath();
+        g.fillPath();
+
+        //
+        // Right wall
+        //
+        g.beginPath();
+        g.moveTo(x + width, y);
+        g.lineTo(x + width - depth, y - depth);
+        g.lineTo(x + width - depth, y + height - depth);
+        g.lineTo(x + width, y + height);
+        g.closePath();
+        g.fillPath();
+
+        //
+        // Floor
+        //
+        g.fillStyle(0xbdd6ff, 0.3);
+
+        g.beginPath();
+        g.moveTo(x, y + height);
+        g.lineTo(x + width, y + height);
+        g.lineTo(x + width - depth, y + height - depth);
+        g.lineTo(x + depth, y + height - depth);
+        g.closePath();
+        g.fillPath();
+
+        //
+        // Bright outline
+        //
+        g.lineStyle(4, 0xffffff, 0.8);
+        g.strokeRoundedRect(x, y, width, height, 8);
+
+        //
+        // Top rim
+        //
+        g.lineStyle(8, 0xffffff, 0.6);
+        g.beginPath();
+        g.moveTo(x + depth, y - depth);
+        g.lineTo(x + width - depth, y - depth);
+        g.strokePath();
+
+        //
+        // Reflection lines
+        //
+        g.lineStyle(2, 0xffffff, 0.25);
+
+        g.beginPath();
+        g.moveTo(x + 40, y + 80);
+        g.lineTo(x + 80, y + 30);
+        g.strokePath();
+
+        g.beginPath();
+        g.moveTo(x + 80, y + 120);
+        g.lineTo(x + 120, y + 70);
         g.strokePath();
 
         return g;
