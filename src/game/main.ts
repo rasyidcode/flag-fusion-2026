@@ -1,6 +1,7 @@
 import { AUTO, Game, type Types } from "phaser";
 import { Game as MainGame } from "./scenes/Game";
 import { GAME_HEIGHT, GAME_WIDTH } from "./config";
+import {Preloader} from "./scenes/Preloader.ts";
 
 const config: Types.Core.GameConfig = {
     type: AUTO,
@@ -21,6 +22,7 @@ const config: Types.Core.GameConfig = {
         }
     },
     scene: [
+        Preloader,
         MainGame
     ]
 }

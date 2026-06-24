@@ -1,8 +1,6 @@
 import { Input, Scene, Physics, Math as PhaserMath, GameObjects } from "phaser";
-import { DROP_Y, FLAGS, GAME_HEIGHT, GAME_WIDTH } from "../config";
-import { getRadiusByRank } from "../utils";
+import {BALL_DEFINITIONS, DROP_Y, GAME_HEIGHT, GAME_WIDTH} from "../config";
 import { Ball } from "../gameobjects/Ball";
-import type { Flag } from "../types";
 
 export class Game extends Scene {
 
@@ -19,22 +17,20 @@ export class Game extends Scene {
         this.canDrop = true;
     }
 
-    preload() {
-        this.load.setPath('assets');
-
-        // load all flags image
-        FLAGS.forEach((flag) => {
-            this.load.image(flag.code, `flags/${flag.code}.png`);
-        });
-    }
-
     create() {
         this.matter.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT, 32, true, true, true, true);        // Visual stadium border bounds
 
-        this.createContainer();
-
-        this.initBallTexture();
-        this.generateParticleTexture();
+        // container
+        this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 60, 'container');
+        this.matter.add.rectangle(GAME_WIDTH / 2, 700, GAME_WIDTH - 60, 20, {
+            isStatic: true,
+        });
+        this.matter.add.rectangle(22, GAME_HEIGHT / 2 + 83, 20, 535, {
+            isStatic: true,
+        });
+        this.matter.add.rectangle(GAME_WIDTH - 22, GAME_HEIGHT / 2 + 83, 20, 535, {
+            isStatic: true,
+        });
 
         this.spawnBall();
 
@@ -45,8 +41,8 @@ export class Game extends Scene {
             const radius = this.currentBall.getData('radius') as number;
             const clampedX = PhaserMath.Clamp(
                 pointer.x,
-                radius,
-                GAME_WIDTH - radius
+                15 + radius,
+                GAME_WIDTH - 15 - radius
             )
             this.currentBall.setX(clampedX);
         });
@@ -55,19 +51,26 @@ export class Game extends Scene {
         this.input.on('pointerdown', (pointer: Input.Pointer) => {
             if (!this.currentBall || !this.canDrop) return;
 
-            const x = this.currentBall.x;
-            const y = this.currentBall.y;
-            const flag = this.currentBall.getData('flag') as Flag;
+            const code = this.currentBall.getData('code') as string;
             const radius = this.currentBall.getData('radius') as number;
+            const level = this.currentBall.getData('level') as number;
+
+            const x = PhaserMath.Clamp(this.currentBall.x, 31 + radius, GAME_WIDTH - 31 - radius);
+            const y = this.currentBall.y;
 
             this.currentBall.destroy();
             this.currentBall = null;
             this.canDrop = false;
 
-            new Ball(this, x, y, `flag-circle-${flag.code}`, radius, flag);
+            new Ball(this, x, y, `ball-${code}`, radius, level);
 
             this.time.delayedCall(550, () => {
-                this.spawnBall(pointer.x);
+                const clampedX = PhaserMath.Clamp(
+                    pointer.x,
+                    15 + radius,
+                    GAME_WIDTH - 15 - radius
+                )
+                this.spawnBall(clampedX);
                 this.canDrop = true;
             });
         });
@@ -79,52 +82,9 @@ export class Game extends Scene {
                 const b = pair.bodyB.gameObject;
 
                 if (a instanceof Ball && b instanceof Ball) {
-                    if (a.flag.rank === b.flag.rank) {
+                    if (a.level === b.level) {
                         this.mergeBalls(a, b);
                     }
-                }
-            }
-        });
-
-    }
-
-    generateParticleTexture() {
-        const size = 12;
-        const canvas = document.createElement('canvas');
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-            ctx.fillStyle = '#FFFFFF';
-            ctx.beginPath();
-            ctx.arc(6, 6, 6, 0, Math.PI * 2);
-            ctx.fill();
-            this.textures.addCanvas('particle', canvas);
-        }
-    }
-
-    initBallTexture() {
-        // create canvas circle texture for each flags
-        FLAGS.forEach((flag) => {
-            const radius = getRadiusByRank(flag.rank);
-            const diameter = radius * 2;
-            const key = `flag-circle-${flag.code}`;
-            const canvasTexture = this.textures.createCanvas(key, diameter, diameter);
-            if (canvasTexture) {
-                const ctx = canvasTexture?.context;
-
-                if (ctx) {
-                    ctx.beginPath();
-                    ctx.arc(radius, radius, radius, 0, Math.PI * 2);
-                    ctx.closePath();
-                    ctx.clip();
-
-                    const flagImage = this.textures.get(flag.code).getSourceImage() as HTMLImageElement;
-                    if (flagImage) {
-                        ctx.drawImage(flagImage, 0, 0, flagImage.width, flagImage.height, 0, 0, diameter, diameter);
-                    }
-
-                    canvasTexture.refresh();
                 }
             }
         });
@@ -132,21 +92,22 @@ export class Game extends Scene {
 
     spawnBall(rawX?: number) {
         // get random flag between rank 1 - 5
-        const randomFlag = FLAGS[PhaserMath.Between(0, 4)];
-        // const randomFlag = FLAGS[0];
-        const radius = getRadiusByRank(randomFlag.rank);
+        const ball = BALL_DEFINITIONS[PhaserMath.Between(0, 3)];
+        // const ball = BALL_DEFINITIONS[];
 
         this.currentBall = this.add.image(
-            rawX ?? GAME_WIDTH / 2 - radius,
+            rawX ?? GAME_WIDTH / 2 - ball.radius,
             DROP_Y,
-            `flag-circle-${randomFlag.code}`
+            `ball-${ball.code}`
         );
-        this.currentBall.setData('flag', randomFlag);
-        this.currentBall.setData('radius', radius);
+
+        this.currentBall.setData('code', ball.code);
+        this.currentBall.setData('radius', ball.radius);
+        this.currentBall.setData('level', ball.level);
     }
 
     mergeBalls(a: Ball, b: Ball) {
-        const newRank = a.flag.rank + 1;
+        const newLevel= a.level + 1;
         const x = (a.x + b.x) / 2;
         const y = (a.y + b.y) / 2;
 
@@ -156,20 +117,16 @@ export class Game extends Scene {
         // create particles
         this.createMergeParticles(x, y);
 
-        const newFlag = FLAGS.find((flag) => flag.rank === newRank);
-        if (newFlag) {
-            const newRadius = getRadiusByRank(newFlag.rank);
-            const mergedBall = new Ball(
+        const newBall = BALL_DEFINITIONS.find((ballDef) => ballDef.level === newLevel);
+        if (newBall) {
+            new Ball(
                 this,
                 x,
                 y,
-                `flag-circle-${newFlag?.code}`,
-                newRadius,
-                newFlag
+                `ball-${newBall?.code}`,
+                newBall.radius,
+                newBall.level
             );
-            mergedBall.setBounce(0.25);
-            mergedBall.setFriction(0.02, 0.01, 0.05);
-            mergedBall.setDensity(0.005 * newFlag.rank);
         }
     }
 
@@ -208,17 +165,6 @@ export class Game extends Scene {
         });
     }
 
-    createContainer() {
-        const g = this.add.graphics();
 
-        g.fillStyle(0xff0000, 1);
-        g.fillCircle(32, 32, 32);
-
-        g.generateTexture('redCircle', 64, 64);
-
-        g.destroy();
-
-        this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'redCircle');
-    }
 
 }

@@ -1,9 +1,8 @@
 import { Physics, Scene } from "phaser";
-import type { Flag } from "../types";
 
 export class Ball extends Physics.Matter.Image {
 
-    flag: Flag;
+    level: number;
 
     radius: number;
 
@@ -13,7 +12,7 @@ export class Ball extends Physics.Matter.Image {
         y: number,
         textureKey: string,
         radius: number,
-        flag: Flag
+        level: number,
     ) {
         super(scene.matter.world, x, y, textureKey, undefined, {
             shape: {
@@ -24,10 +23,9 @@ export class Ball extends Physics.Matter.Image {
             friction: 0.02,
             frictionAir: 0.01,
             frictionStatic: 0.05,
-            density: 0.005 * flag.rank,
         });
 
-        this.flag = flag;
+        this.level = level;
         this.radius = radius;
 
         this.scene.add.existing(this);
