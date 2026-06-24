@@ -17,8 +17,8 @@ const config: Types.Core.GameConfig = {
     physics: {
         default: 'matter',
         matter: {
-            gravity: { x: 0, y: 1.5 },
-            debug: true
+            gravity: { x: 0, y: 1.75 },
+            // debug: true
         }
     },
     scene: [

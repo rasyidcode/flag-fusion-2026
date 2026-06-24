@@ -2,9 +2,14 @@ body {
         margin: 0;
         padding: 0;
         color: rgba(255, 255, 255, 0.87);
-        background: linear-gradient(180deg,
+        /* background: linear-gradient(180deg,
                         #87e752 0%,
-                        #43b929 100%);
+                        #43b929 100%); */
+        /* background: linear-gradient(#FF6060 0%,
+                        #D51C39 100%); */
+        /* background: linear-gradient(#FFF8DE 0%,
+                        #FFF2C6 100%); */
+        background: linear-gradient(#F19E18 0%, #E62314 100%);
 }
 
 #app {

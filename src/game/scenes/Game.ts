@@ -95,8 +95,8 @@ export class Game extends Scene {
 
     spawnBall(rawX?: number) {
         // get random flag between rank 1 - 5
-        // const ball = BALL_DEFINITIONS[PhaserMath.Between(0, 3)];
-        const ball = BALL_DEFINITIONS[0];
+        const ball = BALL_DEFINITIONS[PhaserMath.Between(0, 3)];
+        // const ball = BALL_DEFINITIONS[0];
 
         this.currentBall = this.add.image(
             rawX ?? GAME_WIDTH / 2 - ball.radius,
@@ -119,9 +119,6 @@ export class Game extends Scene {
         a.destroy();
         b.destroy();
 
-        // create particles
-        this.createMergeParticles(x, y, colors);
-
         const newBall = BALL_DEFINITIONS.find((ballDef) => ballDef.level === newLevel);
         if (newBall) {
             new Ball(
@@ -134,6 +131,9 @@ export class Game extends Scene {
                 newBall.colors
             );
         }
+
+        // create particles
+        this.createMergeParticles(x, y, colors);
     }
 
     createMergeParticles(x: number, y: number, colors: string[]) {

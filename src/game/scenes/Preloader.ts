@@ -75,7 +75,7 @@ export class Preloader extends Scene {
         g.fillStyle(0xffffff, 0.7);
         g.fillRect(60, 0, 360, 520);
 
-        g.fillStyle(0xffffff, 0.5);
+        g.fillStyle(0xffffff, 0.6);
         g.beginPath();
         g.moveTo(60, 0);
         g.lineTo(30, 30);
