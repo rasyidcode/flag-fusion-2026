@@ -11,4 +11,5 @@ export interface BallDefinition {
     level: number;
     score: number;
     fit: BALL_DEFINITION_FIT;
+    colors: string[];
 }

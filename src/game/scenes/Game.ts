@@ -1,4 +1,4 @@
-import { Input, Scene, Physics, Math as PhaserMath, GameObjects } from "phaser";
+import { Input, Scene, Physics, Math as PhaserMath, GameObjects, Display } from "phaser";
 import {BALL_DEFINITIONS, DROP_Y, GAME_HEIGHT, GAME_WIDTH} from "../config";
 import { Ball } from "../gameobjects/Ball";
 
@@ -54,6 +54,7 @@ export class Game extends Scene {
             const code = this.currentBall.getData('code') as string;
             const radius = this.currentBall.getData('radius') as number;
             const level = this.currentBall.getData('level') as number;
+            const colors = this.currentBall.getData('colors') as string[];
 
             const x = PhaserMath.Clamp(this.currentBall.x, 31 + radius, GAME_WIDTH - 31 - radius);
             const y = this.currentBall.y;
@@ -62,7 +63,7 @@ export class Game extends Scene {
             this.currentBall = null;
             this.canDrop = false;
 
-            new Ball(this, x, y, `ball-${code}`, radius, level);
+            new Ball(this, x, y, `ball-${code}`, radius, level, colors);
 
             this.time.delayedCall(550, () => {
                 const clampedX = PhaserMath.Clamp(
@@ -83,6 +84,8 @@ export class Game extends Scene {
 
                 if (a instanceof Ball && b instanceof Ball) {
                     if (a.level === b.level) {
+                        // console.log(a);
+                        // console.log(b);
                         this.mergeBalls(a, b);
                     }
                 }
@@ -92,8 +95,8 @@ export class Game extends Scene {
 
     spawnBall(rawX?: number) {
         // get random flag between rank 1 - 5
-        const ball = BALL_DEFINITIONS[PhaserMath.Between(0, 3)];
-        // const ball = BALL_DEFINITIONS[];
+        // const ball = BALL_DEFINITIONS[PhaserMath.Between(0, 3)];
+        const ball = BALL_DEFINITIONS[0];
 
         this.currentBall = this.add.image(
             rawX ?? GAME_WIDTH / 2 - ball.radius,
@@ -104,18 +107,20 @@ export class Game extends Scene {
         this.currentBall.setData('code', ball.code);
         this.currentBall.setData('radius', ball.radius);
         this.currentBall.setData('level', ball.level);
+        this.currentBall.setData('colors', ball.colors);
     }
 
     mergeBalls(a: Ball, b: Ball) {
         const newLevel= a.level + 1;
         const x = (a.x + b.x) / 2;
         const y = (a.y + b.y) / 2;
+        const colors = a.colors;
 
         a.destroy();
         b.destroy();
 
         // create particles
-        this.createMergeParticles(x, y);
+        this.createMergeParticles(x, y, colors);
 
         const newBall = BALL_DEFINITIONS.find((ballDef) => ballDef.level === newLevel);
         if (newBall) {
@@ -125,12 +130,13 @@ export class Game extends Scene {
                 y,
                 `ball-${newBall?.code}`,
                 newBall.radius,
-                newBall.level
+                newBall.level,
+                newBall.colors
             );
         }
     }
 
-    createMergeParticles(x: number, y: number) {
+    createMergeParticles(x: number, y: number, colors: string[]) {
         if (!this.textures.exists('particle-dot')) {
             const canvas = this.textures.createCanvas('particle-dot', 4, 4);
             if (canvas) {
@@ -153,12 +159,15 @@ export class Game extends Scene {
         const emitter = this.add.particles(x, y, "particle-dot", {
             speed: { min: 80, max: 200 },
             scale: { start: 1, end: 0 },
+            tint: colors.map((color) => {
+                return Display.Color.HexStringToColor(color).color
+            }),
             lifespan: 700,
             blendMode: "ADD",
             maxParticles: 16,
             gravityY: 150,
         });
-        emitter.setDepth(5);
+        emitter.setDepth(3);
 
         this.time.delayedCall(700, () => {
             emitter.destroy();

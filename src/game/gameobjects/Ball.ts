@@ -6,6 +6,8 @@ export class Ball extends Physics.Matter.Image {
 
     radius: number;
 
+    colors: string[];
+
     constructor(
         scene: Scene,
         x: number,
@@ -13,6 +15,7 @@ export class Ball extends Physics.Matter.Image {
         textureKey: string,
         radius: number,
         level: number,
+        colors: string[],
     ) {
         super(scene.matter.world, x, y, textureKey, undefined, {
             shape: {
@@ -27,8 +30,11 @@ export class Ball extends Physics.Matter.Image {
 
         this.level = level;
         this.radius = radius;
+        this.colors = colors;
 
         this.scene.add.existing(this);
+
+        this.setDepth(2);
     }
 
 }
