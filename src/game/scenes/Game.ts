@@ -1,4 +1,4 @@
-import { Input, Scene, Physics, Math as PhaserMath, GameObjects, Display, Geom } from "phaser";
+import { Input, Scene, Physics, Math as PhaserMath, GameObjects } from "phaser";
 import { DROP_Y, FLAGS, GAME_HEIGHT, GAME_WIDTH } from "../config";
 import { getRadiusByRank } from "../utils";
 import { Ball } from "../gameobjects/Ball";
@@ -209,50 +209,7 @@ export class Game extends Scene {
     }
 
     createContainer() {
-        const g = this.add.graphics();
-        const x = 30;
-        const y = 150;
-        const width = GAME_WIDTH - 60;
-        const height = 550;
-        const depth = 40; // Simulated isometric depth for 3D glass look
 
-        g.fillStyle(0xffffff, 0.20);
-        g.fillRect(x + depth, y - depth, width - 80, height);
-
-        // 4. Isometric left wall highlight
-        g.fillStyle(0xffffff, 0.15);
-        g.beginPath();
-        g.moveTo(x, y);
-        g.lineTo(x + depth, y - depth);
-        g.lineTo(x + depth, y + height - depth);
-        g.lineTo(x, y + height);
-        g.closePath();
-        g.fillPath();
-
-        // 5. Isometric right wall highlight
-        g.beginPath();
-        g.moveTo(x + width, y);
-        g.lineTo(x + width - depth, y - depth);
-        g.lineTo(x + width - depth, y + height - depth);
-        g.lineTo(x + width, y + height);
-        g.closePath();
-        g.fillPath();
-
-        // 6. Transparent floor panel
-        g.fillStyle(0xbdd6ff, 0.3);
-        g.beginPath();
-        g.moveTo(x, y + height);
-        g.lineTo(x + width, y + height);
-        g.lineTo(x + width - depth, y + height - depth);
-        g.lineTo(x + depth, y + height - depth);
-        g.closePath();
-        g.fillPath();
-
-        // 7. Bright front outline (simulating glass edges catching light)
-        g.lineStyle(4, 0xffffff, 0.8);
-        g.strokeRoundedRect(x, y, width, height, 8);
-
-        return g;
     }
 
 }

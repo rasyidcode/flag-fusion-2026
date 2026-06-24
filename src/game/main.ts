@@ -1,4 +1,4 @@
-import { AUTO, Game, Scale, type Types } from "phaser";
+import { AUTO, Game, type Types } from "phaser";
 import { Game as MainGame } from "./scenes/Game";
 import { GAME_HEIGHT, GAME_WIDTH } from "./config";
 

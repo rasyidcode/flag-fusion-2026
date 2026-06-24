@@ -4,4 +4,4 @@ export interface Flag {
     name: string;
     color: string;
     rank: number;
-};
+}
