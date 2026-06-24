@@ -209,7 +209,16 @@ export class Game extends Scene {
     }
 
     createContainer() {
+        const g = this.add.graphics();
 
+        g.fillStyle(0xff0000, 1);
+        g.fillCircle(32, 32, 32);
+
+        g.generateTexture('redCircle', 64, 64);
+
+        g.destroy();
+
+        this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'redCircle');
     }
 
 }
