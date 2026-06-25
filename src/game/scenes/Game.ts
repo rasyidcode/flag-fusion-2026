@@ -1,4 +1,4 @@
-import { Input, Scene, Physics, Math as PhaserMath, GameObjects, Display, TintModes } from "phaser";
+import { Input, Scene, Physics, Math as PhaserMath, GameObjects, Display } from "phaser";
 import { BALL_DEFINITIONS, DROP_Y, GAME_HEIGHT, GAME_WIDTH } from "../config";
 import { Ball } from "../gameobjects/Ball";
 
@@ -71,7 +71,7 @@ export class Game extends Scene {
 
     spawnBall(rawX?: number) {
         // get random flag between rank 1 - 5
-        const ball = BALL_DEFINITIONS[PhaserMath.Between(0, 3)];
+        const ball = BALL_DEFINITIONS[PhaserMath.Between(0, 4)];
         // const ball = BALL_DEFINITIONS[1];
 
         const ballX = rawX ?? GAME_WIDTH / 2 - ball.radius;
