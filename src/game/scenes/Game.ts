@@ -1,5 +1,5 @@
-import { Input, Scene, Physics, Math as PhaserMath, GameObjects, Display } from "phaser";
-import {BALL_DEFINITIONS, DROP_Y, GAME_HEIGHT, GAME_WIDTH} from "../config";
+import { Input, Scene, Physics, Math as PhaserMath, GameObjects, Display, TintModes } from "phaser";
+import { BALL_DEFINITIONS, DROP_Y, GAME_HEIGHT, GAME_WIDTH } from "../config";
 import { Ball } from "../gameobjects/Ball";
 
 export class Game extends Scene {
@@ -8,6 +8,8 @@ export class Game extends Scene {
 
     canDrop: boolean = true;
 
+    dropGuide: GameObjects.Image | null = null;
+
     constructor() {
         super('Game');
     }
@@ -15,12 +17,13 @@ export class Game extends Scene {
     init() {
         this.currentBall = null;
         this.canDrop = true;
+        this.dropGuide = null;
     }
 
     create() {
         this.matter.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT, 32, true, true, true, true);        // Visual stadium border bounds
 
-        // container
+        // define container and its phisycs
         this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 60, 'container');
         this.matter.add.rectangle(GAME_WIDTH / 2, 700, GAME_WIDTH - 60, 20, {
             isStatic: true,
@@ -36,7 +39,7 @@ export class Game extends Scene {
 
         // move the ball based on pointer.x position
         this.input.on('pointermove', (pointer: Input.Pointer) => {
-            if (!this.currentBall) return;
+            if (!this.currentBall || !this.dropGuide) return;
 
             const radius = this.currentBall.getData('radius') as number;
             const clampedX = PhaserMath.Clamp(
@@ -45,6 +48,7 @@ export class Game extends Scene {
                 GAME_WIDTH - 15 - radius
             )
             this.currentBall.setX(clampedX);
+            this.dropGuide.setX(clampedX);
         });
 
         // drop the ball
@@ -62,10 +66,11 @@ export class Game extends Scene {
             this.currentBall.destroy();
             this.currentBall = null;
             this.canDrop = false;
+            this.dropGuide?.destroy();
 
             new Ball(this, x, y, `ball-${code}`, radius, level, colors);
 
-            this.time.delayedCall(550, () => {
+            this.time.delayedCall(650, () => {
                 const clampedX = PhaserMath.Clamp(
                     pointer.x,
                     15 + radius,
@@ -83,11 +88,7 @@ export class Game extends Scene {
                 const b = pair.bodyB.gameObject;
 
                 if (a instanceof Ball && b instanceof Ball) {
-                    if (a.level === b.level) {
-                        // console.log(a);
-                        // console.log(b);
-                        this.mergeBalls(a, b);
-                    }
+                    this.mergeBalls(a, b);
                 }
             }
         });
@@ -96,10 +97,11 @@ export class Game extends Scene {
     spawnBall(rawX?: number) {
         // get random flag between rank 1 - 5
         const ball = BALL_DEFINITIONS[PhaserMath.Between(0, 3)];
-        // const ball = BALL_DEFINITIONS[0];
+        // const ball = BALL_DEFINITIONS[1];
 
+        const ballX = rawX ?? GAME_WIDTH / 2 - ball.radius;
         this.currentBall = this.add.image(
-            rawX ?? GAME_WIDTH / 2 - ball.radius,
+            ballX,
             DROP_Y,
             `ball-${ball.code}`
         );
@@ -108,10 +110,21 @@ export class Game extends Scene {
         this.currentBall.setData('radius', ball.radius);
         this.currentBall.setData('level', ball.level);
         this.currentBall.setData('colors', ball.colors);
+
+        // define drop guide
+        const dropGuideY = GAME_HEIGHT / 2;
+        this.dropGuide = this.add.image(ballX, dropGuideY, `drop-guide-${ball.code}`);
+        this.dropGuide.setDepth(1);
     }
 
     mergeBalls(a: Ball, b: Ball) {
-        const newLevel= a.level + 1;
+        if (a.merged || b.merged) return;
+        if (a.level !== b.level) return;
+
+        a.merged = true;
+        b.merged = true;
+
+        const newLevel = a.level + 1;
         const x = (a.x + b.x) / 2;
         const y = (a.y + b.y) / 2;
         const colors = a.colors;
@@ -173,7 +186,5 @@ export class Game extends Scene {
             emitter.destroy();
         });
     }
-
-
-
 }
+

@@ -1,6 +1,6 @@
-import {Scene} from "phaser";
-import {BALL_DEFINITIONS} from "../config.ts";
-import {BALL_DEFINITION_FIT} from "../types.ts";
+import { Display, Scene } from "phaser";
+import { BALL_DEFINITIONS, DROP_Y, GAME_HEIGHT } from "../config.ts";
+import { BALL_DEFINITION_FIT } from "../types.ts";
 
 export class Preloader extends Scene {
     constructor() {
@@ -22,6 +22,9 @@ export class Preloader extends Scene {
 
         // container texture
         this.createContainerTexture();
+
+        // drop guide texture
+        this.createDropGuideTexture();
 
         this.scene.start('Game');
     }
@@ -102,11 +105,45 @@ export class Preloader extends Scene {
         g.fillPath()
 
         g.lineStyle(4, 0xffffff, 1);
-        g.strokeRoundedRect(30, 30 , 420, 518, 2.5);
+        g.strokeRoundedRect(30, 30, 420, 518, 2.5);
         // g.strokeRect(30, 30 , 420, 518);
 
         g.generateTexture('container', 480, 550);
 
         g.destroy();
+    }
+
+    createDropGuideTexture() {
+        BALL_DEFINITIONS.forEach((ballDef) => {
+            const color = Display.Color.HexStringToColor(ballDef.colors[0]).color;
+
+            const g = this.add.graphics();
+
+            const x = 4;
+            const startY = DROP_Y + ballDef.radius;
+            const endY = GAME_HEIGHT - 33;
+
+            const dashLength = 6;
+            const gapLength = 6;
+
+            let currentY = startY;
+
+            g.lineStyle(2, color, 0.45);
+            while (currentY < endY) {
+                g.beginPath();
+                g.moveTo(x, currentY);
+                g.lineTo(x, Math.min(currentY + dashLength, endY));
+                g.strokePath();
+                currentY += dashLength + gapLength;
+            }
+
+            g.fillStyle(color, 0.35);
+            g.fillCircle(x, endY, 4);
+
+            g.generateTexture(`drop-guide-${ballDef.code}`, 10, GAME_HEIGHT);
+
+            g.destroy();
+        });
+
     }
 }

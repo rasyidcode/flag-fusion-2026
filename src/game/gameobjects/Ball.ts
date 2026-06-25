@@ -2,6 +2,8 @@ import { Physics, Scene } from "phaser";
 
 export class Ball extends Physics.Matter.Image {
 
+    merged: boolean;
+
     level: number;
 
     radius: number;
@@ -28,13 +30,15 @@ export class Ball extends Physics.Matter.Image {
             frictionStatic: 0.05,
         });
 
+        this.merged = false;
+
         this.level = level;
         this.radius = radius;
         this.colors = colors;
 
         this.scene.add.existing(this);
 
-        this.setDepth(2);
+        this.setDepth(0);
     }
 
 }
