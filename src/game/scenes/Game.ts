@@ -53,32 +53,7 @@ export class Game extends Scene {
 
         // drop the ball
         this.input.on('pointerdown', (pointer: Input.Pointer) => {
-            if (!this.currentBall || !this.canDrop) return;
-
-            const code = this.currentBall.getData('code') as string;
-            const radius = this.currentBall.getData('radius') as number;
-            const level = this.currentBall.getData('level') as number;
-            const colors = this.currentBall.getData('colors') as string[];
-
-            const x = PhaserMath.Clamp(this.currentBall.x, 31 + radius, GAME_WIDTH - 31 - radius);
-            const y = this.currentBall.y;
-
-            this.currentBall.destroy();
-            this.currentBall = null;
-            this.canDrop = false;
-            this.dropGuide?.destroy();
-
-            new Ball(this, x, y, `ball-${code}`, radius, level, colors);
-
-            this.time.delayedCall(650, () => {
-                const clampedX = PhaserMath.Clamp(
-                    pointer.x,
-                    15 + radius,
-                    GAME_WIDTH - 15 - radius
-                )
-                this.spawnBall(clampedX);
-                this.canDrop = true;
-            });
+            this.dropBall(pointer.x);
         });
 
         // check collision between balls
@@ -115,6 +90,35 @@ export class Game extends Scene {
         const dropGuideY = GAME_HEIGHT / 2;
         this.dropGuide = this.add.image(ballX, dropGuideY, `drop-guide-${ball.code}`);
         this.dropGuide.setDepth(1);
+    }
+
+    dropBall(rawX: number) {
+        if (!this.currentBall || !this.canDrop) return;
+
+        const code = this.currentBall.getData('code') as string;
+        const radius = this.currentBall.getData('radius') as number;
+        const level = this.currentBall.getData('level') as number;
+        const colors = this.currentBall.getData('colors') as string[];
+
+        const x = PhaserMath.Clamp(this.currentBall.x, 31 + radius, GAME_WIDTH - 31 - radius);
+        const y = this.currentBall.y;
+
+        this.currentBall.destroy();
+        this.currentBall = null;
+        this.canDrop = false;
+        this.dropGuide?.destroy();
+
+        new Ball(this, x, y, `ball-${code}`, radius, level, colors);
+
+        this.time.delayedCall(650, () => {
+            const clampedX = PhaserMath.Clamp(
+                rawX,
+                15 + radius,
+                GAME_WIDTH - 15 - radius
+            )
+            this.spawnBall(clampedX);
+            this.canDrop = true;
+        });
     }
 
     mergeBalls(a: Ball, b: Ball) {
