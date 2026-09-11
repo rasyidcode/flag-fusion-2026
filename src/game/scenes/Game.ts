@@ -221,6 +221,11 @@ export class Game extends Scene {
 
             // camera shake based on tier
             this.triggerMergeCameraShake(newLevel);
+
+            // grand finale celebration if spain is fused!
+            if (newLevel === 11) {
+                this.triggerChampionCelebration(x, y);
+            }
         }
 
         // create particles
@@ -339,12 +344,84 @@ export class Game extends Scene {
         this.tweens.add({
             targets: text,
             y: y - 45,
-            scale: { start: 0.6, to: 1.1},
+            scale: { start: 0.6, to: 1.1 },
             alpha: { start: 1, to: 0 },
             duration: 850,
             ease: 'Cubic.easeOut',
             onComplete: () => {
                 text.destroy();
+            }
+        });
+    }
+
+    triggerChampionCelebration(x: number, y: number) {
+        // create a rectangular confetti texture if not already created
+        if (!this.textures.exists('confetti-piece')) {
+            const canvas = this.textures.createCanvas('confetti-piece', 8, 12);
+            if (canvas?.context) {
+                canvas.context.fillStyle = '#ffffff';
+                canvas.context.fillRect(0, 0, 8, 12);
+                canvas.refresh();
+            }
+        }
+
+        // confetti fountain emitter
+        const confettiColors = [0xF1BF00, 0xAA151B, 0xFFFFFF, 0x00E676, 0x2979FF];
+        const emitter = this.add.particles(x, y, 'confetti-piece', {
+            speed: { min: 200, max: 450 },
+            angle: { min: 210, max: 330 }, // shoots upward like a fountain
+            gravityY: 320, // gravity pulls confetti down
+            rotate: { start: 0, end: 720}, // Fluttering spin
+            tint: confettiColors,
+            lifespan: 3000,
+            quantity: 50,
+            maxParticles: 75,
+            scale: { start: 1, end: 0 },
+        });
+        emitter.setDepth(15);
+
+        // auto clean emitter
+        this.time.delayedCall(3200, () => {
+            emitter.destroy();
+        });
+
+        // triumphant floating banner
+        const banner = this.add.text(GAME_WIDTH / 2, 240, '🏆 2026 WORLD CHAMPION! 🏆', {
+            fontFamily: 'Montserrat, sans-serif',
+            fontSize: '22px',
+            fontStyle: '900',
+            color: '#ffd700',
+            stroke: '#000000',
+            strokeThickness: 5,
+            shadow: {
+                offsetX: 0,
+                offsetY: 4,
+                color: 'rgba(0, 0, 0, 0.6)',
+                blur: 8,
+                fill: true
+            }
+        });
+        banner.setOrigin(0.5);
+        banner.setDepth(20);
+
+        // pop in with elastic overshoot, float up, and fade
+        banner.setScale(0.2);
+        this.tweens.add({
+            targets: banner,
+            scale: 1.1,
+            duration: 350,
+            ease: 'Back.easeOut',
+            onComplete: () => {
+                this.tweens.add({
+                    targets: banner,
+                    y: 200,
+                    alpha: 0,
+                    duration: 1500,
+                    ease: 'Power2',
+                    onComplete: () => {
+                        banner.destroy();
+                    }
+                });
             }
         });
     }
@@ -388,6 +465,12 @@ export class Game extends Scene {
             const balls = this.children.getChildren().filter((child) => child instanceof Ball) as Ball[];
             balls.forEach((ball) => ball.destroy());
             this.dangerTimer = 0;
+        });
+
+        // press 'S' -> Test Spain celebration (grand finale)
+        this.input.keyboard?.on('keydown-S', () => {
+            this.triggerChampionCelebration(GAME_WIDTH / 2, GAME_HEIGHT / 2);
+            this.triggerMergeCameraShake(11); // simulate Spain merge camera shake
         });
     }
 
