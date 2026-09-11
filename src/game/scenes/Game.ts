@@ -192,20 +192,32 @@ export class Game extends Scene {
         a.destroy();
         b.destroy();
 
-        const newBall = BALL_DEFINITIONS.find((ballDef) => ballDef.level === newLevel);
-        if (newBall) {
-            new Ball(
+        const newBallDef = BALL_DEFINITIONS.find((ballDef) => ballDef.level === newLevel);
+        if (newBallDef) {
+            const newBall = new Ball(
                 this,
                 x,
                 y,
-                `ball-${newBall?.code}`,
-                newBall.radius,
-                newBall.level,
-                newBall.colors
+                `ball-${newBallDef?.code}`,
+                newBallDef.radius,
+                newBallDef.level,
+                newBallDef.colors
             );
 
-            // Award points based on ball definition tier score
-            this.updateScore(newBall.score);
+            // elastic pop-in (displaces surrounding balls smoothly)
+            newBall.setScale(0.2);
+            this.tweens.add({
+                targets: newBall,
+                scale: 1,
+                duration: 200,
+                ease: 'Back.easeOut',
+            });
+
+            // award points based on ball definition tier score
+            this.updateScore(newBallDef.score);
+
+            // camera shake based on tier
+            this.triggerMergeCameraShake(newLevel);
         }
 
         // create particles
@@ -261,6 +273,94 @@ export class Game extends Scene {
             if (bestEl) bestEl.textContent = this.highScore.toString();
             localStorage.setItem('flag_fusion_2026_highscore', this.highScore.toString());
         }
+    }
+
+    triggerGameOver() {
+        this.isGameOver = true;
+        this.canDrop = false;
+        this.dropGuide?.destroy();
+        this.currentBall?.destroy();
+
+        // show game over overlay
+        const modal = document.getElementById('game-over-modal');
+        if (modal) {
+            const finalScoreEl = document.getElementById('final-score');
+            if (finalScoreEl) finalScoreEl.textContent = this.score.toString();
+
+            const finalBestEl = document.getElementById('final-best');
+            if (finalBestEl) finalBestEl.textContent = this.highScore.toString();
+
+            modal.classList.add('visible');
+        }
+    }
+
+    // trigger camera shake effect based on ball tier
+    triggerMergeCameraShake(level: number) {
+        // only shake for mid-to-high tiers (tier 5 and up)
+        if (level < 5) return;
+
+        // scale intensity with level
+        // Tier 5-6 (Morocco, Belgium): gentle micro-bump
+        // Tier 7-8 (Norway, France): medium punch
+        // Tier 9-10 (England, Argentina): heavy impact
+        // Tier 11 (Spain): massive rumble
+        let duration = 80;
+        let intensity = 0.003;
+
+        if (level >= 11) {
+            duration = 300;
+            intensity = 0.02;
+        } else if (level >= 9) {
+            duration = 180;
+            intensity = 0.01;
+        } else if (level >= 7) {
+            duration = 120;
+            intensity = 0.006;
+        }
+
+        this.cameras.main.shake(duration, intensity);
+    }
+
+    // setup debug controls for development mode
+    setupDebugControls() {
+        if (!import.meta.env.DEV) return;
+
+        // press 'D' -> Spawn ball in Critical Danger zone
+        this.input.keyboard?.on('keydown-D', () => {
+            const def = BALL_DEFINITIONS[4]; // always spawn the highest tier ball for testing
+            const ball = new Ball(
+                this,
+                GAME_WIDTH / 2,
+                DANGER_ZONE_Y + 10,
+                `ball-${def.code}`,
+                def.radius,
+                def.level,
+                def.colors
+            );
+            ball.setStatic(true);
+        });
+
+        // press 'W' -> Spawn ball in Warning zone (approaching danger line)
+        this.input.keyboard?.on('keydown-W', () => {
+            const def = BALL_DEFINITIONS[4]; // always spawn the highest tier ball for testing
+            const ball = new Ball(
+                this,
+                GAME_WIDTH / 2,
+                DANGER_ZONE_Y + 60,
+                `ball-${def.code}`,
+                def.radius,
+                def.level,
+                def.colors
+            );
+            ball.setStatic(true);
+        });
+
+        // press 'C' -> Clear all balls in the playfield
+        this.input.keyboard?.on('keydown-C', () => {
+            const balls = this.children.getChildren().filter((child) => child instanceof Ball) as Ball[];
+            balls.forEach((ball) => ball.destroy());
+            this.dangerTimer = 0;
+        });
     }
 
     update(time: number, delta: number) {
@@ -321,64 +421,8 @@ export class Game extends Scene {
         }
     }
 
-    triggerGameOver() {
-        this.isGameOver = true;
-        this.canDrop = false;
-        this.dropGuide?.destroy();
-        this.currentBall?.destroy();
 
-        // show game over overlay
-        const modal = document.getElementById('game-over-modal');
-        if (modal) {
-            const finalScoreEl = document.getElementById('final-score');
-            if (finalScoreEl) finalScoreEl.textContent = this.score.toString();
 
-            const finalBestEl = document.getElementById('final-best');
-            if (finalBestEl) finalBestEl.textContent = this.highScore.toString();
 
-            modal.classList.add('visible');
-        }
-    }
-
-    setupDebugControls() {
-        if (!import.meta.env.DEV) return;
-
-        // press 'D' -> Spawn ball in Critical Danger zone
-        this.input.keyboard?.on('keydown-D', () => {
-            const def = BALL_DEFINITIONS[4]; // always spawn the highest tier ball for testing
-            const ball = new Ball(
-                this,
-                GAME_WIDTH / 2,
-                DANGER_ZONE_Y + 10,
-                `ball-${def.code}`,
-                def.radius,
-                def.level,
-                def.colors
-            );
-            ball.setStatic(true);
-        });
-
-        // press 'W' -> Spawn ball in Warning zone (approaching danger line)
-        this.input.keyboard?.on('keydown-W', () => {
-            const def = BALL_DEFINITIONS[4]; // always spawn the highest tier ball for testing
-            const ball = new Ball(
-                this,
-                GAME_WIDTH / 2,
-                DANGER_ZONE_Y + 60,
-                `ball-${def.code}`,
-                def.radius,
-                def.level,
-                def.colors
-            );
-            ball.setStatic(true);
-        });
-
-        // press 'C' -> Clear all balls in the playfield
-        this.input.keyboard?.on('keydown-C', () => {
-            const balls = this.children.getChildren().filter((child) => child instanceof Ball) as Ball[];
-            balls.forEach((ball) => ball.destroy());
-            this.dangerTimer = 0;
-        });
-    }
 }
 
