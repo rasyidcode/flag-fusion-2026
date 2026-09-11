@@ -5,13 +5,94 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="/style.css">
-  <title>Flag Fusion 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <title>Play Flag Fusion 2026</title>
 </head>
 
 <body>
+  <!-- Full-Width Top Navbar / Header -->
+  <header class="site-header">
+    <h1 class="game-title">Play Flag Fusion 2026</h1>
+  </header>
+
   <div id="app">
-    <div id="game-container"></div>
+    <div id="game">
+      <!-- Left Column: Score Panel -->
+      <aside class="game-panel left-panel">
+        <div class="suika-bubble score-bubble">
+          <div class="bubble-header">Score</div>
+          <div class="score-value" id="score-display">0</div>
+          <div class="bubble-footer-row">
+            <span class="footer-label">BEST SCORE</span>
+            <span class="footer-value" id="best-display">0</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Center Column: Canvas Container & Evolution Track -->
+      <div class="center-column">
+        <main id="game-container"></main>
+
+        <!-- Horizontal Evolution Track -->
+        <footer class="evolution-track" title="Ball Evolution Progression">
+          <div class="evo-step" title="Level 1: Colombia">
+            <img src="/assets/flags/co.png" alt="Colombia" />
+          </div>
+          <span class="evo-arrow">›</span>
+          <div class="evo-step" title="Level 2: Brazil">
+            <img src="/assets/flags/br.png" alt="Brazil" />
+          </div>
+          <span class="evo-arrow">›</span>
+          <div class="evo-step" title="Level 3: Portugal">
+            <img src="/assets/flags/pt.png" alt="Portugal" />
+          </div>
+          <span class="evo-arrow">›</span>
+          <div class="evo-step" title="Level 4: Switzerland">
+            <img src="/assets/flags/ch.png" alt="Switzerland" />
+          </div>
+          <span class="evo-arrow">›</span>
+          <div class="evo-step" title="Level 5: Morocco">
+            <img src="/assets/flags/ma.png" alt="Morocco" />
+          </div>
+          <span class="evo-arrow">›</span>
+          <div class="evo-step" title="Level 6: Belgium">
+            <img src="/assets/flags/be.png" alt="Belgium" />
+          </div>
+          <span class="evo-arrow">›</span>
+          <div class="evo-step" title="Level 7: Norway">
+            <img src="/assets/flags/no.png" alt="Norway" />
+          </div>
+          <span class="evo-arrow">›</span>
+          <div class="evo-step" title="Level 8: France">
+            <img src="/assets/flags/fr.png" alt="France" />
+          </div>
+          <span class="evo-arrow">›</span>
+          <div class="evo-step" title="Level 9: England">
+            <img src="/assets/flags/gb-eng.png" alt="England" />
+          </div>
+          <span class="evo-arrow">›</span>
+          <div class="evo-step" title="Level 10: Argentina">
+            <img src="/assets/flags/ar.png" alt="Argentina" />
+          </div>
+          <span class="evo-arrow">›</span>
+          <div class="evo-step evo-champion" title="Level 11: Spain (Champions!)">
+            <img src="/assets/flags/es.png" alt="Spain" />
+          </div>
+        </footer>
+      </div>
+
+      <!-- Right Column: Next Ball Panel -->
+      <aside class="game-panel right-panel">
+        <div class="suika-bubble next-bubble">
+          <div class="bubble-header">Next</div>
+          <div class="next-ball-wrapper">
+            <img id="next-flag-img" src="/assets/flags/co.png" alt="Next Ball" />
+          </div>
+        </div>
+      </aside>
+    </div>
   </div>
   <script type="module" src="/src/main.ts"></script>
 </body>

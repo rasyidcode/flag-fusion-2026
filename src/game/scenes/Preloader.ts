@@ -21,7 +21,7 @@ export class Preloader extends Scene {
         this.createBallTexture();
 
         // container texture
-        this.createContainerTexture();
+        this.createContainerTexture3();
 
         // drop guide texture
         this.createDropGuideTexture();
@@ -110,6 +110,96 @@ export class Preloader extends Scene {
 
         g.generateTexture('container', 480, 550);
 
+        g.destroy();
+    }
+
+    createContainerTexture2() {
+        const g = this.add.graphics();
+
+        // 1. Inner Playfield Background (Creamy with 85% opacity so pitch grass subtly shows)
+        g.fillStyle(0xfff8e7, 0.85);
+        g.fillRect(60, 0, 360, 520);
+
+        // 2. Left 3D Bevel Wall (Matching darker beige depth)
+        g.fillStyle(0xf0deba, 0.95);
+        g.beginPath();
+        g.moveTo(60, 0);
+        g.lineTo(30, 30);
+        g.lineTo(30, 550);
+        g.lineTo(60, 520);
+        g.closePath();
+        g.fillPath();
+
+        // 3. Right 3D Bevel Wall
+        g.beginPath();
+        g.moveTo(450, 30);
+        g.lineTo(420, 0);
+        g.lineTo(420, 520);
+        g.lineTo(450, 550);
+        g.closePath();
+        g.fillPath();
+
+        // 4. Bottom Floor Bevel
+        g.fillStyle(0xe5cda1, 1);
+        g.beginPath();
+        g.moveTo(60, 520);
+        g.lineTo(420, 520);
+        g.lineTo(450, 550);
+        g.lineTo(30, 550);
+        g.closePath();
+        g.fillPath();
+
+        // 5. Outer Frame / Border (Matching the card's rich brown outline)
+        g.lineStyle(4, 0x8c6127, 1);
+        g.strokeRoundedRect(30, 30, 420, 518, 4);
+
+        // Bake into Phaser texture
+        g.generateTexture('container', 480, 550);
+        g.destroy();
+    }
+
+    createContainerTexture3() {
+        const g = this.add.graphics();
+
+        // 1. Crystal Clear Back Glass (12% opacity lets the stadium green shine through)
+        g.fillStyle(0xffffff, 0.12);
+        g.fillRect(60, 0, 360, 520);
+
+        // 2. Left 3D Glass Wall Refraction (18% opacity)
+        g.fillStyle(0xffffff, 0.18);
+        g.beginPath();
+        g.moveTo(60, 0);
+        g.lineTo(30, 30);
+        g.lineTo(30, 550);
+        g.lineTo(60, 520);
+        g.closePath();
+        g.fillPath();
+
+        // 3. Right 3D Glass Wall Refraction (18% opacity)
+        g.beginPath();
+        g.moveTo(450, 30);
+        g.lineTo(420, 0);
+        g.lineTo(420, 520);
+        g.lineTo(450, 550);
+        g.closePath();
+        g.fillPath();
+
+        // 4. Solid Glass Base / Floor (35% opacity shows floor thickness)
+        g.fillStyle(0xffffff, 0.35);
+        g.beginPath();
+        g.moveTo(60, 520);
+        g.lineTo(420, 520);
+        g.lineTo(450, 550);
+        g.lineTo(30, 550);
+        g.closePath();
+        g.fillPath();
+
+        // 5. Polished Glass Frame & Highlight (Crisp semi-translucent white rim)
+        g.lineStyle(3, 0xffffff, 0.85);
+        g.strokeRoundedRect(30, 30, 420, 518, 6);
+
+        // Bake into Phaser texture
+        g.generateTexture('container', 480, 550);
         g.destroy();
     }
 
