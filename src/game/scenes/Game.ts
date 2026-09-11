@@ -21,6 +21,8 @@ export class Game extends Scene {
 
     dangerTimer: number = 0;
 
+    dangerLine: GameObjects.Image | null = null;
+
     constructor() {
         super('Game');
     }
@@ -33,6 +35,7 @@ export class Game extends Scene {
         this.nextBallDef = null;
         this.isGameOver = false;
         this.dangerTimer = 0;
+        this.dangerLine = null;
 
         // Load high scorere from local storage
         const savedBest = localStorage.getItem('flag_fusion_2026_highscore');
@@ -62,8 +65,9 @@ export class Game extends Scene {
         });
 
         // create dashed danger line
-        const dangerLine = this.add.image(GAME_WIDTH / 2, DANGER_ZONE_Y, 'danger-zone');
-        dangerLine.setDepth(1);
+        this.dangerLine = this.add.image(GAME_WIDTH / 2, DANGER_ZONE_Y, 'danger-zone');
+        this.dangerLine.setDepth(1);
+        this.dangerLine.setAlpha(0);
 
         this.spawnBall();
 
@@ -109,6 +113,8 @@ export class Game extends Scene {
                 this.scene.restart();
             }
         }
+
+        this.setupDebugControls();
     }
 
     spawnBall(rawX?: number) {
@@ -257,29 +263,48 @@ export class Game extends Scene {
         }
     }
 
-    update(_time: number, delta: number) {
+    update(time: number, delta: number) {
         if (this.isGameOver) return;
 
         // get all active Ball instances in the scene
         const balls = this.children.getChildren().filter((child) => child instanceof Ball) as Ball[];
 
-        // check if any ball is resting above the danger line
-        const isAnyBallOverflowing = balls.some((ball) => {
-            // only inspect the body if it exists
-            const body = ball.body as MatterJS.BodyType;
-            if (!body) return false;
+        // track the highest settled ball in the playfield
+        let highestBallTop = GAME_HEIGHT;
 
-            // is the ball resting / moving slowly? (avoid triggering while still in free-fall)
+        for (const ball of balls) {
+            const body = ball.body as MatterJS.BodyType;
+            if (!body) continue;
+
             const isSettled = Math.abs(body.velocity.y) < 0.25 && Math.abs(body.velocity.x) < 0.25;
-            
-            // Has the ball fallen past the drop hover area?
             const isInsidePlayfield = ball.y > DROP_Y + 40;
 
-            // is the top of the ball above the danger line?
-            const isAboveDangerLine = (ball.y - ball.radius) < DANGER_ZONE_Y;
+            if (isSettled && isInsidePlayfield) {
+                const topEdge = ball.y - ball.radius;
+                if (topEdge < highestBallTop) {
+                    highestBallTop = topEdge;
+                }
+            }
+        }
 
-            return isSettled && isInsidePlayfield && isAboveDangerLine;
-        })
+        // check if any ball is resting above the danger line
+        const isAnyBallOverflowing = highestBallTop < DANGER_ZONE_Y;
+        const isNearDanger = highestBallTop < DANGER_ZONE_Y + 70; // warning treshold (within 70px)
+
+        // -- danger line visual feedback
+        if (this.dangerLine) {
+            if (isAnyBallOverflowing) {
+                // PANIC
+                const pulse = 0.5 + 1.0 * ((Math.sin(time * 0.015) + 1) / 2);
+                this.dangerLine.setAlpha(pulse);
+            } else if (isNearDanger) {
+                // WARNING
+                this.dangerLine.setAlpha(1.0);
+            } else {
+                // SAFE
+                this.dangerLine.setAlpha(0);
+            }
+        }
 
         // grace period timer
         if (isAnyBallOverflowing) {
@@ -287,6 +312,7 @@ export class Game extends Scene {
 
             // if resting above line for 2.5 consecutive seconds -> GAME OVER
             if (this.dangerTimer >= 2500) {
+                this.dangerLine?.setAlpha(1.0); // solid red line final game over
                 this.triggerGameOver();
             }
         } else {
@@ -312,6 +338,47 @@ export class Game extends Scene {
 
             modal.classList.add('visible');
         }
+    }
+
+    setupDebugControls() {
+        if (!import.meta.env.DEV) return;
+
+        // press 'D' -> Spawn ball in Critical Danger zone
+        this.input.keyboard?.on('keydown-D', () => {
+            const def = BALL_DEFINITIONS[4]; // always spawn the highest tier ball for testing
+            const ball = new Ball(
+                this,
+                GAME_WIDTH / 2,
+                DANGER_ZONE_Y + 10,
+                `ball-${def.code}`,
+                def.radius,
+                def.level,
+                def.colors
+            );
+            ball.setStatic(true);
+        });
+
+        // press 'W' -> Spawn ball in Warning zone (approaching danger line)
+        this.input.keyboard?.on('keydown-W', () => {
+            const def = BALL_DEFINITIONS[4]; // always spawn the highest tier ball for testing
+            const ball = new Ball(
+                this,
+                GAME_WIDTH / 2,
+                DANGER_ZONE_Y + 60,
+                `ball-${def.code}`,
+                def.radius,
+                def.level,
+                def.colors
+            );
+            ball.setStatic(true);
+        });
+
+        // press 'C' -> Clear all balls in the playfield
+        this.input.keyboard?.on('keydown-C', () => {
+            const balls = this.children.getChildren().filter((child) => child instanceof Ball) as Ball[];
+            balls.forEach((ball) => ball.destroy());
+            this.dangerTimer = 0;
+        });
     }
 }
 
