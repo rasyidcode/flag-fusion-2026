@@ -1,5 +1,6 @@
 import { Input, Scene, Physics, Math as PhaserMath, GameObjects, Display } from "phaser";
 import { BALL_DEFINITIONS, DROP_Y, GAME_HEIGHT, GAME_WIDTH } from "../config";
+import type { BallDefinition } from "../types";
 import { Ball } from "../gameobjects/Ball";
 
 export class Game extends Scene {
@@ -10,6 +11,12 @@ export class Game extends Scene {
 
     dropGuide: GameObjects.Image | null = null;
 
+    score: number = 0;
+
+    highScore: number = 0;
+
+    nextBallDef: BallDefinition | null = null;
+
     constructor() {
         super('Game');
     }
@@ -18,6 +25,19 @@ export class Game extends Scene {
         this.currentBall = null;
         this.canDrop = true;
         this.dropGuide = null;
+        this.score = 0;
+        this.nextBallDef = null;
+
+        // Load high scorere from local storage
+        const savedBest = localStorage.getItem('flag_fusion_2026_highscore');
+        this.highScore = savedBest ? parseInt(savedBest, 10) : 0;
+
+        // Initialize HTML displays
+        const bestEl = document.getElementById('best-display');
+        if (bestEl) bestEl.textContent = this.highScore.toString();
+
+        const scoreEl = document.getElementById('score-display');
+        if (scoreEl) scoreEl.textContent = this.score.toString();
     }
 
     create() {
@@ -70,9 +90,17 @@ export class Game extends Scene {
     }
 
     spawnBall(rawX?: number) {
-        // get random flag between rank 1 - 5
-        const ball = BALL_DEFINITIONS[PhaserMath.Between(0, 4)];
-        // const ball = BALL_DEFINITIONS[1];
+        // current ball to drop: use queue ball, or roll random on the first turn
+        const ball = this.nextBallDef ?? BALL_DEFINITIONS[PhaserMath.Between(0, 4)];
+
+        // roll a new random ball (tiers 1-5, indexes 0-4) for the next turn
+        this.nextBallDef = BALL_DEFINITIONS[PhaserMath.Between(0, 4)];
+
+        // update the next ball image in the HTML HUD
+        const nextImg = document.getElementById('next-flag-img') as HTMLImageElement;
+        if (nextImg && this.nextBallDef) {
+            nextImg.src = `assets/flags/${this.nextBallDef.code}.png`;
+        }
 
         const ballX = rawX ?? GAME_WIDTH / 2 - ball.radius;
         this.currentBall = this.add.image(
@@ -147,6 +175,9 @@ export class Game extends Scene {
                 newBall.level,
                 newBall.colors
             );
+
+            // Award points based on ball definition tier score
+            this.updateScore(newBall.score);
         }
 
         // create particles
@@ -189,6 +220,19 @@ export class Game extends Scene {
         this.time.delayedCall(700, () => {
             emitter.destroy();
         });
+    }
+
+    updateScore(points: number) {
+        this.score += points;
+        const scoreEl = document.getElementById('score-display');
+        if (scoreEl) scoreEl.textContent = this.score.toString();
+
+        if (this.score > this.highScore) {
+            this.highScore = this.score;
+            const bestEl = document.getElementById('best-display');
+            if (bestEl) bestEl.textContent = this.highScore.toString();
+            localStorage.setItem('flag_fusion_2026_highscore', this.highScore.toString());
+        }
     }
 }
 
