@@ -12,7 +12,7 @@
 </head>
 
 <body>
-  <!-- Full-Width Top Navbar / Header -->
+  <!-- Full-Width Top Navbar -->
   <header class="site-header">
     <h1 class="game-title">Play Flag Fusion 2026</h1>
   </header>
@@ -33,7 +33,29 @@
 
       <!-- Center Column: Canvas Container & Evolution Track -->
       <div class="center-column">
-        <main id="game-container"></main>
+        <div class="canvas-wrapper">
+          <!-- Phaser Canvas Mount -->
+          <main id="game-container"></main>
+
+          <!-- Glassmorphic Game Over Modal Overlay -->
+          <div id="game-over-modal" class="game-over-overlay">
+            <div class="game-over-card">
+              <h2 class="game-over-title">GAME OVER</h2>
+
+              <div class="modal-score-group">
+                <span class="modal-label">YOUR SCORE</span>
+                <span id="final-score" class="modal-score-val">0</span>
+              </div>
+
+              <div class="modal-best-group">
+                <span class="modal-best-label">BEST SCORE</span>
+                <span id="final-best" class="modal-best-val">0</span>
+              </div>
+
+              <button id="restart-btn" class="play-again-btn">PLAY AGAIN</button>
+            </div>
+          </div>
+        </div>
 
         <!-- Horizontal Evolution Track -->
         <footer class="evolution-track" title="Ball Evolution Progression">

@@ -4,6 +4,7 @@ export const GAME_WIDTH = 480;
 export const GAME_HEIGHT = 720;
 
 export const DROP_Y = 50;
+export const DANGER_ZONE_Y = 190;
 
 export const BALL_DEFINITIONS: BallDefinition[] = [
     {

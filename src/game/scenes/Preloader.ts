@@ -1,5 +1,5 @@
 import { Display, Scene } from "phaser";
-import { BALL_DEFINITIONS, DROP_Y, GAME_HEIGHT } from "../config.ts";
+import { BALL_DEFINITIONS, DROP_Y, GAME_HEIGHT, GAME_WIDTH } from "../config.ts";
 import { BALL_DEFINITION_FIT } from "../types.ts";
 
 export class Preloader extends Scene {
@@ -25,6 +25,9 @@ export class Preloader extends Scene {
 
         // drop guide texture
         this.createDropGuideTexture();
+
+        // danger zone texture
+        this.createDangerZoneTexture();
 
         this.scene.start('Game');
     }
@@ -235,5 +238,29 @@ export class Preloader extends Scene {
             g.destroy();
         });
 
+    }
+
+    createDangerZoneTexture() {
+        const g = this.add.graphics();
+
+        g.lineStyle(2, 0xff4d4d, 0.7); // Vibrant red color with 70% opacity
+
+        const startX = 35;
+        const endX = GAME_WIDTH - 35;
+        const dashLength = 8;
+        const gapLength = 6;
+
+        let curX = startX;
+        while (curX < endX) {
+            g.beginPath();
+            g.moveTo(curX, 2);
+            g.lineTo(Math.min(curX + dashLength, endX), 2);
+            g.strokePath();
+            curX += dashLength + gapLength;
+        }
+
+        g.generateTexture('danger-zone', GAME_WIDTH, 4);
+
+        g.destroy();
     }
 }

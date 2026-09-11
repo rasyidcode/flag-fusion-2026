@@ -1,5 +1,5 @@
 import { Input, Scene, Physics, Math as PhaserMath, GameObjects, Display } from "phaser";
-import { BALL_DEFINITIONS, DROP_Y, GAME_HEIGHT, GAME_WIDTH } from "../config";
+import { BALL_DEFINITIONS, DANGER_ZONE_Y, DROP_Y, GAME_HEIGHT, GAME_WIDTH } from "../config";
 import type { BallDefinition } from "../types";
 import { Ball } from "../gameobjects/Ball";
 
@@ -17,6 +17,10 @@ export class Game extends Scene {
 
     nextBallDef: BallDefinition | null = null;
 
+    isGameOver: boolean = false;
+
+    dangerTimer: number = 0;
+
     constructor() {
         super('Game');
     }
@@ -27,6 +31,8 @@ export class Game extends Scene {
         this.dropGuide = null;
         this.score = 0;
         this.nextBallDef = null;
+        this.isGameOver = false;
+        this.dangerTimer = 0;
 
         // Load high scorere from local storage
         const savedBest = localStorage.getItem('flag_fusion_2026_highscore');
@@ -54,6 +60,10 @@ export class Game extends Scene {
         this.matter.add.rectangle(GAME_WIDTH - 22, GAME_HEIGHT / 2 + 83, 20, 535, {
             isStatic: true,
         });
+
+        // create dashed danger line
+        const dangerLine = this.add.image(GAME_WIDTH / 2, DANGER_ZONE_Y, 'danger-zone');
+        dangerLine.setDepth(1);
 
         this.spawnBall();
 
@@ -87,6 +97,18 @@ export class Game extends Scene {
                 }
             }
         });
+
+        // wire up play again button
+        const restartBtn = document.getElementById('restart-btn');
+        if (restartBtn) {
+            restartBtn.onclick = () => {
+                const modal = document.getElementById('game-over-modal');
+                modal?.classList.remove('visible');
+
+                // Restart the game scene
+                this.scene.restart();
+            }
+        }
     }
 
     spawnBall(rawX?: number) {
@@ -232,6 +254,63 @@ export class Game extends Scene {
             const bestEl = document.getElementById('best-display');
             if (bestEl) bestEl.textContent = this.highScore.toString();
             localStorage.setItem('flag_fusion_2026_highscore', this.highScore.toString());
+        }
+    }
+
+    update(_time: number, delta: number) {
+        if (this.isGameOver) return;
+
+        // get all active Ball instances in the scene
+        const balls = this.children.getChildren().filter((child) => child instanceof Ball) as Ball[];
+
+        // check if any ball is resting above the danger line
+        const isAnyBallOverflowing = balls.some((ball) => {
+            // only inspect the body if it exists
+            const body = ball.body as MatterJS.BodyType;
+            if (!body) return false;
+
+            // is the ball resting / moving slowly? (avoid triggering while still in free-fall)
+            const isSettled = Math.abs(body.velocity.y) < 0.25 && Math.abs(body.velocity.x) < 0.25;
+            
+            // Has the ball fallen past the drop hover area?
+            const isInsidePlayfield = ball.y > DROP_Y + 40;
+
+            // is the top of the ball above the danger line?
+            const isAboveDangerLine = (ball.y - ball.radius) < DANGER_ZONE_Y;
+
+            return isSettled && isInsidePlayfield && isAboveDangerLine;
+        })
+
+        // grace period timer
+        if (isAnyBallOverflowing) {
+            this.dangerTimer += delta;
+
+            // if resting above line for 2.5 consecutive seconds -> GAME OVER
+            if (this.dangerTimer >= 2500) {
+                this.triggerGameOver();
+            }
+        } else {
+            // reset timer if all balls settled back down
+            this.dangerTimer = 0;
+        }
+    }
+
+    triggerGameOver() {
+        this.isGameOver = true;
+        this.canDrop = false;
+        this.dropGuide?.destroy();
+        this.currentBall?.destroy();
+
+        // show game over overlay
+        const modal = document.getElementById('game-over-modal');
+        if (modal) {
+            const finalScoreEl = document.getElementById('final-score');
+            if (finalScoreEl) finalScoreEl.textContent = this.score.toString();
+
+            const finalBestEl = document.getElementById('final-best');
+            if (finalBestEl) finalBestEl.textContent = this.highScore.toString();
+
+            modal.classList.add('visible');
         }
     }
 }
