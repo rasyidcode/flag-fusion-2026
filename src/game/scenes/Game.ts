@@ -216,6 +216,9 @@ export class Game extends Scene {
             // award points based on ball definition tier score
             this.updateScore(newBallDef.score);
 
+            // floating score popup
+            this.createScorePopup(x, y, newBallDef.score);
+
             // camera shake based on tier
             this.triggerMergeCameraShake(newLevel);
         }
@@ -321,6 +324,31 @@ export class Game extends Scene {
         this.cameras.main.shake(duration, intensity);
     }
 
+    createScorePopup(x: number, y: number, points: number) {
+        const text = this.add.text(x, y, `+${points}`, {
+            fontFamily: 'Montserrat, sans-serif',
+            fontSize: points >= 64 ? '24px' : '20px',
+            fontStyle: 'bold',
+            color: '#ffe066',
+            stroke: '#1a1a1a',
+            strokeThickness: 3,
+        });
+        text.setOrigin(0.5);
+        text.setDepth(10);
+
+        this.tweens.add({
+            targets: text,
+            y: y - 45,
+            scale: { start: 0.6, to: 1.1},
+            alpha: { start: 1, to: 0 },
+            duration: 850,
+            ease: 'Cubic.easeOut',
+            onComplete: () => {
+                text.destroy();
+            }
+        });
+    }
+
     // setup debug controls for development mode
     setupDebugControls() {
         if (!import.meta.env.DEV) return;
@@ -420,9 +448,6 @@ export class Game extends Scene {
             this.dangerTimer = 0;
         }
     }
-
-
-
 
 }
 
