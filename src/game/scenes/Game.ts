@@ -24,6 +24,8 @@ export class Game extends Scene {
 
     dangerLine: GameObjects.Image | null = null;
 
+    unlockedLevels: Set<number> = new Set();
+
     constructor() {
         super('Game');
     }
@@ -37,6 +39,7 @@ export class Game extends Scene {
         this.isGameOver = false;
         this.dangerTimer = 0;
         this.dangerLine = null;
+        this.unlockedLevels = new Set();
 
         // Load high scorere from local storage
         const savedBest = localStorage.getItem('flag_fusion_2026_highscore');
@@ -48,6 +51,14 @@ export class Game extends Scene {
 
         const scoreEl = document.getElementById('score-display');
         if (scoreEl) scoreEl.textContent = this.score.toString();
+
+        // Reset evoluton track visuals
+        document.querySelectorAll('.evo-step').forEach((el) => {
+            el.classList.remove('unlocked', 'just-unlocked');
+        });
+        document.querySelectorAll('.evo-arrow').forEach((el) => {
+            el.classList.remove('unlocked');
+        });
     }
 
     create() {
@@ -163,6 +174,11 @@ export class Game extends Scene {
         // current ball to drop: use queue ball, or roll random on the first turn
         const ball = this.nextBallDef ?? BALL_DEFINITIONS[PhaserMath.Between(0, 4)];
 
+        this.unlockEvolutionStep(ball.level);
+        if (this.nextBallDef) {
+            this.unlockEvolutionStep(this.nextBallDef.level);
+        }
+
         // roll a new random ball (tiers 1-5, indexes 0-4) for the next turn
         this.nextBallDef = BALL_DEFINITIONS[PhaserMath.Between(0, 4)];
 
@@ -264,6 +280,9 @@ export class Game extends Scene {
             this.createScorePopup(x, y, newBallDef.score);
 
             soundManager.playMerge(newLevel);
+
+            // unlock newly fused nation in the evolution track
+            this.unlockEvolutionStep(newLevel);
 
             // camera shake based on tier
             this.triggerMergeCameraShake(newLevel);
@@ -522,6 +541,28 @@ export class Game extends Scene {
             this.triggerChampionCelebration(GAME_WIDTH / 2, GAME_HEIGHT / 2);
             this.triggerMergeCameraShake(11); // simulate Spain merge camera shake
         });
+    }
+
+    unlockEvolutionStep(level: number) {
+        if (this.unlockedLevels.has(level)) return;
+        this.unlockedLevels.add(level);
+
+        // light up the flag with an elastic pop animation
+        const stepEl = document.querySelector(`.evo-step[data-level="${level}"]`);
+        if (stepEl) {
+            stepEl.classList.add('unlocked', 'just-unlocked');
+            setTimeout(() => {
+                stepEl.classList.remove('just-unlocked');
+            }, 600);
+        }
+
+        // light up the golden arrow leading into tier
+        if (level > 1) {
+            const arrowEl = document.querySelector(`.evo-arrow[data-from="${level - 1}"]`);
+            if (arrowEl) {
+                arrowEl.classList.add('unlocked');
+            }
+        }
     }
 
     update(time: number, delta: number) {
