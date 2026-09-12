@@ -1,11 +1,16 @@
-body {
+html, body {
   margin: 0;
   padding: 0;
   color: #ffffff;
   background: radial-gradient(circle at 50% 20%, #1f7a37 0%, #124d22 55%, #0a2e14 100%);
   font-family: 'Fredoka', 'Nunito', system-ui, -apple-system, sans-serif;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
+  overscroll-behavior: none;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* Full-Width Top Navbar */
@@ -206,10 +211,13 @@ body {
 .canvas-wrapper {
   position: relative;
   width: 480px;
-  height: 720px;
+  max-width: 100%;
+  aspect-ratio: 480 / 720;
+  height: auto;
   flex-shrink: 0;
   border-radius: 16px;
   overflow: hidden;
+  touch-action: none;
 }
 
 /* Canvas Container */
@@ -219,10 +227,14 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  touch-action: none;
 }
 
 #game-container canvas {
   display: block;
+  max-width: 100%;
+  max-height: 100%;
+  touch-action: none;
 }
 
 /* Glassmorphic Game Over Modal Overlay */
@@ -434,13 +446,16 @@ body {
   #game {
     flex-wrap: wrap;
     justify-content: space-between;
-    max-width: 480px;
+    max-width: min(440px, 92vw);
     gap: 12px;
+    margin: 0 auto;
   }
 
   .game-panel {
     min-width: auto;
-    flex: 1;
+    width: 135px;
+    max-width: 140px;
+    flex: 0 1 auto;
     margin-top: 0;
   }
 
@@ -459,6 +474,9 @@ body {
 
   .canvas-wrapper {
     width: 100%;
+    max-width: min(440px, 92vw);
+    aspect-ratio: 480 / 720;
+    height: auto;
   }
 
   #game-container {
@@ -466,26 +484,33 @@ body {
   }
 
   .suika-bubble {
-    height: 155px;
-    padding: 10px 12px;
-    border-radius: 18px;
-  }
-
-  .score-value {
-    font-size: 32px;
+    height: 76px;
+    padding: 8px 10px;
+    border-radius: 14px;
+    justify-content: center;
+    gap: 6px;
   }
 
   .bubble-header {
-    font-size: 16px;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  .score-value {
+    font-size: 24px;
+    margin: 0;
+  }
+
+  /* Hide Best Score on mobile phone */
+  .bubble-footer-row {
+    display: none;
   }
 
   .next-ball-wrapper {
-    width: 52px;
-    height: 52px;
-  }
-
-  .footer-value {
-    font-size: 15px;
+    width: 40px;
+    height: 40px;
+    margin: 0;
+    border-width: 2px;
   }
 
   .evolution-track {

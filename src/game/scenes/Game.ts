@@ -72,23 +72,33 @@ export class Game extends Scene {
 
         this.spawnBall();
 
-        // move the ball based on pointer.x position
-        this.input.on('pointermove', (pointer: Input.Pointer) => {
+        const updateBallAim = (pointerX: number) => {
             if (!this.currentBall || !this.dropGuide) return;
-
             const radius = this.currentBall.getData('radius') as number;
             const clampedX = PhaserMath.Clamp(
-                pointer.x,
+                pointerX,
                 15 + radius,
                 GAME_WIDTH - 15 - radius
             )
             this.currentBall.setX(clampedX);
             this.dropGuide.setX(clampedX);
+        }
+
+        // Aim while moving (desktop hover or mobile drag)
+        this.input.on('pointermove', (pointer: Input.Pointer) => {
+            updateBallAim(pointer.x);
         });
 
-        // drop the ball
+        // Touch down snaps the ball to the finger position
         this.input.on('pointerdown', (pointer: Input.Pointer) => {
-            this.dropBall(pointer.x);
+            updateBallAim(pointer.x);
+        });
+
+        // Releasing finger/mouse drop the ball
+        this.input.on('pointerup', (_pointer: Input.Pointer) => {
+            if (this.currentBall) {
+                this.dropBall(this.currentBall.x);
+            }
         });
 
         // check collision between balls
