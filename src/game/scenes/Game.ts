@@ -2,6 +2,7 @@ import { Input, Scene, Physics, Math as PhaserMath, GameObjects, Display } from 
 import { BALL_DEFINITIONS, DANGER_ZONE_Y, DROP_Y, GAME_HEIGHT, GAME_WIDTH } from "../config";
 import type { BallDefinition } from "../types";
 import { Ball } from "../gameobjects/Ball";
+import { soundManager } from "../audio";
 
 export class Game extends Scene {
 
@@ -99,6 +100,16 @@ export class Game extends Scene {
                 if (a instanceof Ball && b instanceof Ball) {
                     this.mergeBalls(a, b);
                 }
+
+                if (a instanceof Ball || b instanceof Ball) {
+                    const relSpeed = Math.hypot(
+                        pair.bodyA.velocity.x - pair.bodyB.velocity.x,
+                        pair.bodyA.velocity.y - pair.bodyB.velocity.y
+                    )
+                    if (relSpeed > 1.2) {
+                        soundManager.playBounce(relSpeed / 10);
+                    }
+                }
             }
         });
 
@@ -166,6 +177,8 @@ export class Game extends Scene {
 
         new Ball(this, x, y, `ball-${code}`, radius, level, colors);
 
+        soundManager.playDrop();
+
         this.time.delayedCall(650, () => {
             const clampedX = PhaserMath.Clamp(
                 rawX,
@@ -218,6 +231,8 @@ export class Game extends Scene {
 
             // floating score popup
             this.createScorePopup(x, y, newBallDef.score);
+
+            soundManager.playMerge(newLevel);
 
             // camera shake based on tier
             this.triggerMergeCameraShake(newLevel);
@@ -289,6 +304,8 @@ export class Game extends Scene {
         this.dropGuide?.destroy();
         this.currentBall?.destroy();
 
+        soundManager.playGameOver();
+
         // show game over overlay
         const modal = document.getElementById('game-over-modal');
         if (modal) {
@@ -355,6 +372,8 @@ export class Game extends Scene {
     }
 
     triggerChampionCelebration(x: number, y: number) {
+        soundManager.playChampion();
+
         // create a rectangular confetti texture if not already created
         if (!this.textures.exists('confetti-piece')) {
             const canvas = this.textures.createCanvas('confetti-piece', 8, 12);
@@ -371,7 +390,7 @@ export class Game extends Scene {
             speed: { min: 200, max: 450 },
             angle: { min: 210, max: 330 }, // shoots upward like a fountain
             gravityY: 320, // gravity pulls confetti down
-            rotate: { start: 0, end: 720}, // Fluttering spin
+            rotate: { start: 0, end: 720 }, // Fluttering spin
             tint: confettiColors,
             lifespan: 3000,
             quantity: 50,

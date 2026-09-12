@@ -1,4 +1,4 @@
-import {BALL_DEFINITION_FIT, type BallDefinition} from "./types.ts";
+import { BALL_DEFINITION_FIT, type BallDefinition } from "./types.ts";
 
 export const GAME_WIDTH = 480;
 export const GAME_HEIGHT = 720;
@@ -106,4 +106,19 @@ export const BALL_DEFINITIONS: BallDefinition[] = [
         fit: BALL_DEFINITION_FIT.COVER,
         colors: ['0xAA151B', '0xF1BF00']
     },
+];
+
+// Muscal notes for Tiers 1 through 11 (C Major scale risng up to G5)
+export const TIER_FREQUENCIES: number[] = [
+    261.63, // Tier 1 (Colombia)  - C4
+    293.66, // Tier 2 (Brazil)    - D4
+    329.63, // Tier 3 (Portugal)  - E4
+    349.23, // Tier 4 (Switz)     - F4
+    392.00, // Tier 5 (Morocco)   - G4
+    440.00, // Tier 6 (Belgium)   - A4
+    493.88, // Tier 7 (Norway)    - B4
+    523.25, // Tier 8 (France)    - C5
+    587.33, // Tier 9 (England)   - D5
+    659.25, // Tier 10 (Argentina)- E5
+    783.99, // Tier 11 (Spain)    - G5
 ];
