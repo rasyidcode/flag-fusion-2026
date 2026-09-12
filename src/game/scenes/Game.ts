@@ -125,6 +125,27 @@ export class Game extends Scene {
             }
         }
 
+        // wire up sound toggle button
+        const soundBtn = document.getElementById('sound-toggle-btn');
+        const soundIcon = document.getElementById('sound-icon');
+        const updateSoundUI = () => {
+            if (soundIcon && soundBtn) {
+                soundIcon.textContent = soundManager.isMuted ? '🔇' : '🔊';
+                soundBtn.classList.toggle('muted', soundManager.isMuted);
+                soundBtn.setAttribute('title', soundManager.isMuted ? 'Unmute Sound' : 'Mute Sound');
+            }
+        }
+
+        // initialize state (loads any saved mute preference from localStorage)
+        updateSoundUI();
+
+        if (soundBtn) {
+            soundBtn.onclick = () => {
+                soundManager.toggleMute();
+                updateSoundUI();
+            }
+        }
+
         this.setupDebugControls();
     }
 

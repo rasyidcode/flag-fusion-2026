@@ -33,6 +33,44 @@ body {
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
+/* Glassmorphic Audio Toggle Button */
+.sound-toggle-btn {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  color: #ffffff;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.sound-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.sound-toggle-btn:active {
+  transform: translateY(-50%) scale(0.94);
+}
+
+.sound-toggle-btn.muted {
+  background: rgba(255, 80, 80, 0.25);
+  border-color: rgba(255, 120, 120, 0.5);
+}
+
 #app {
   width: 100%;
   min-height: calc(100vh - 58px);
@@ -384,6 +422,13 @@ body {
 
   .game-title {
     font-size: 20px;
+  }
+
+  .sound-toggle-btn {
+    right: 12px;
+    width: 34px;
+    height: 34px;
+    font-size: 15px;
   }
 
   #game {
