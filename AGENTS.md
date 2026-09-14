@@ -1,4 +1,4 @@
-# AGENTS.md — World Cup Suika (Flag Fusion 2026) Developer & Agent Guide
+# AGENTS.md — World Cup Suika Developer & Agent Guide
 
 Welcome to **World Cup Suika** (formerly *Flag Fusion 2026*)! This document defines the operating rules, architectural knowledge, and coaching protocols for AI assistants working on this repository.
 

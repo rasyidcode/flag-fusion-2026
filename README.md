@@ -1,4 +1,4 @@
-# ⚽ World Cup Suika (Flag Fusion 2026)
+# ⚽ World Cup Suika
 
 [![Phaser 4](https://img.shields.io/badge/Engine-Phaser%204-ff69b4.svg)](https://phaser.io/)
 [![TypeScript](https://img.shields.io/badge/Language-TypeScript%206-blue.svg)](https://www.typescriptlang.org/)
