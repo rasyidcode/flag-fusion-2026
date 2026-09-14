@@ -333,6 +333,112 @@ html, body {
   color: #ffd700;
 }
 
+/* Hidden Utility */
+.hidden {
+  display: none !important;
+}
+
+/* New Record Badge Celebration */
+.new-record-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.25) 0%, rgba(255, 152, 0, 0.25) 100%);
+  border: 1.5px solid #ffd700;
+  border-radius: 20px;
+  padding: 4px 14px;
+  color: #ffd700;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.4);
+  animation: recordPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes recordPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 14px rgba(255, 215, 0, 0.4);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 24px rgba(255, 215, 0, 0.7);
+  }
+}
+
+.record-sparkle {
+  font-size: 13px;
+}
+
+/* Highest Nation Reached Group */
+.modal-highest-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.modal-highest-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 1px;
+}
+
+.modal-highest-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 18px;
+  padding: 8px 16px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.highest-flag-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.highest-flag-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.highest-nation-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.highest-nation-name {
+  font-size: 15px;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.highest-nation-tier {
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffd700;
+  letter-spacing: 0.5px;
+}
+
 /* Play Again Button */
 .play-again-btn {
   background: linear-gradient(135deg, #ffd700 0%, #ff9800 100%);
@@ -381,20 +487,24 @@ html, body {
   height: 26px;
   border-radius: 50%;
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.6);
-  background: rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  opacity: 0.35;
+  filter: grayscale(80%);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  transition: transform 0.15s ease;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
 }
 
 .evo-step:hover {
   transform: scale(1.3);
   border-color: #ffffff;
+  opacity: 1;
+  filter: none;
   z-index: 5;
 }
 
@@ -403,22 +513,52 @@ html, body {
   height: 100%;
   object-fit: cover;
   display: block;
+  pointer-events: none;
+}
+
+.evo-step.unlocked {
+  opacity: 1;
+  filter: none;
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 /* Level 11 Champion Highlight */
 .evo-step.evo-champion {
   width: 29px;
   height: 29px;
+  border-color: rgba(255, 215, 0, 0.35);
+  box-shadow: none;
+}
+
+.evo-step.evo-champion.unlocked {
   border: 2.5px solid #ffd700;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.9), 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Unlock Pop Animation */
+@keyframes evoPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.5); box-shadow: 0 0 16px rgba(255, 215, 0, 1); }
+  100% { transform: scale(1); }
+}
+
+.evo-step.just-unlocked {
+  animation: evoPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .evo-arrow {
   font-size: 13px;
   font-weight: 900;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.25);
   line-height: 1;
   user-select: none;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.evo-arrow.unlocked {
+  color: #ffd700;
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.7);
 }
 
 /* Mobile & Tablet Responsive Layout */
@@ -530,5 +670,15 @@ html, body {
 
   .evo-arrow {
     font-size: 11px;
+  }
+
+  .game-over-card {
+    width: 280px;
+    padding: 20px 22px;
+    gap: 12px;
+  }
+
+  .modal-score-val {
+    font-size: 38px;
   }
 }

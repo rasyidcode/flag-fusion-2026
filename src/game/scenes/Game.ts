@@ -24,6 +24,10 @@ export class Game extends Scene {
 
     dangerLine: GameObjects.Image | null = null;
 
+    unlockedLevels: Set<number> = new Set();
+
+    isNewRecord: boolean = false;
+
     constructor() {
         super('Game');
     }
@@ -37,6 +41,8 @@ export class Game extends Scene {
         this.isGameOver = false;
         this.dangerTimer = 0;
         this.dangerLine = null;
+        this.unlockedLevels = new Set();
+        this.isNewRecord = false;
 
         // Load high scorere from local storage
         const savedBest = localStorage.getItem('flag_fusion_2026_highscore');
@@ -48,6 +54,14 @@ export class Game extends Scene {
 
         const scoreEl = document.getElementById('score-display');
         if (scoreEl) scoreEl.textContent = this.score.toString();
+
+        // Reset evoluton track visuals
+        document.querySelectorAll('.evo-step').forEach((el) => {
+            el.classList.remove('unlocked', 'just-unlocked');
+        });
+        document.querySelectorAll('.evo-arrow').forEach((el) => {
+            el.classList.remove('unlocked');
+        });
     }
 
     create() {
@@ -108,7 +122,10 @@ export class Game extends Scene {
                 const b = pair.bodyB.gameObject;
 
                 if (a instanceof Ball && b instanceof Ball) {
-                    this.mergeBalls(a, b);
+                    if (a.level === b.level && !a.merged && !b.merged) {
+                        this.mergeBalls(a, b);
+                        continue;
+                    }
                 }
 
                 if (a instanceof Ball || b instanceof Ball) {
@@ -163,6 +180,11 @@ export class Game extends Scene {
         // current ball to drop: use queue ball, or roll random on the first turn
         const ball = this.nextBallDef ?? BALL_DEFINITIONS[PhaserMath.Between(0, 4)];
 
+        this.unlockEvolutionStep(ball.level);
+        if (this.nextBallDef) {
+            this.unlockEvolutionStep(this.nextBallDef.level);
+        }
+
         // roll a new random ball (tiers 1-5, indexes 0-4) for the next turn
         this.nextBallDef = BALL_DEFINITIONS[PhaserMath.Between(0, 4)];
 
@@ -211,6 +233,8 @@ export class Game extends Scene {
         soundManager.playDrop();
 
         this.time.delayedCall(650, () => {
+            if (this.isGameOver) return;
+
             const clampedX = PhaserMath.Clamp(
                 rawX,
                 15 + radius,
@@ -264,6 +288,9 @@ export class Game extends Scene {
             this.createScorePopup(x, y, newBallDef.score);
 
             soundManager.playMerge(newLevel);
+
+            // unlock newly fused nation in the evolution track
+            this.unlockEvolutionStep(newLevel);
 
             // camera shake based on tier
             this.triggerMergeCameraShake(newLevel);
@@ -323,6 +350,7 @@ export class Game extends Scene {
 
         if (this.score > this.highScore) {
             this.highScore = this.score;
+            this.isNewRecord = true;
             const bestEl = document.getElementById('best-display');
             if (bestEl) bestEl.textContent = this.highScore.toString();
             localStorage.setItem('flag_fusion_2026_highscore', this.highScore.toString());
@@ -345,6 +373,27 @@ export class Game extends Scene {
 
             const finalBestEl = document.getElementById('final-best');
             if (finalBestEl) finalBestEl.textContent = this.highScore.toString();
+
+            const recordBadge = document.getElementById('new-record-badge');
+            if (recordBadge) {
+                recordBadge.classList.toggle('hidden', !this.isNewRecord);
+            }
+
+            const highestLevel = this.unlockedLevels.size > 0
+                ? Math.max(...this.unlockedLevels) : 1;
+            const highestDef = BALL_DEFINITIONS.find((b) => b.level == highestLevel) || BALL_DEFINITIONS[0];
+
+            const flagEl = document.getElementById('final-highest-flag') as HTMLImageElement | null;
+            if (flagEl) {
+                flagEl.src = `/assets/flags/${highestDef.code}.png`;
+                flagEl.alt = highestDef.name;
+            }
+
+            const nameEl = document.getElementById('final-highest-name');
+            if (nameEl) nameEl.textContent = highestDef.name;
+
+            const tierEl = document.getElementById('final-highest-tier');
+            if (tierEl) tierEl.textContent = `Tier ${highestDef.level}`;
 
             modal.classList.add('visible');
         }
@@ -522,6 +571,28 @@ export class Game extends Scene {
             this.triggerChampionCelebration(GAME_WIDTH / 2, GAME_HEIGHT / 2);
             this.triggerMergeCameraShake(11); // simulate Spain merge camera shake
         });
+    }
+
+    unlockEvolutionStep(level: number) {
+        if (this.unlockedLevels.has(level)) return;
+        this.unlockedLevels.add(level);
+
+        // light up the flag with an elastic pop animation
+        const stepEl = document.querySelector(`.evo-step[data-level="${level}"]`);
+        if (stepEl) {
+            stepEl.classList.add('unlocked', 'just-unlocked');
+            setTimeout(() => {
+                stepEl.classList.remove('just-unlocked');
+            }, 600);
+        }
+
+        // light up the golden arrow leading into tier
+        if (level > 1) {
+            const arrowEl = document.querySelector(`.evo-arrow[data-from="${level - 1}"]`);
+            if (arrowEl) {
+                arrowEl.classList.add('unlocked');
+            }
+        }
     }
 
     update(time: number, delta: number) {
