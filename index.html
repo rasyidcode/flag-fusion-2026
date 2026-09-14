@@ -43,11 +43,28 @@
           <!-- Glassmorphic Game Over Modal Overlay -->
           <div id="game-over-modal" class="game-over-overlay">
             <div class="game-over-card">
+              <div id="new-record-badge" class="new-record-badge hidden">
+                <span class="record-sparkle">✨</span> NEW RECORD! <span class="record-sparkle">✨</span>
+              </div>
+
               <h2 class="game-over-title">GAME OVER</h2>
 
               <div class="modal-score-group">
                 <span class="modal-label">YOUR SCORE</span>
                 <span id="final-score" class="modal-score-val">0</span>
+              </div>
+
+              <div class="modal-highest-group">
+                <span class="modal-highest-label">HIGHEST NATION</span>
+                <div class="modal-highest-badge">
+                  <div class="highest-flag-circle">
+                    <img id="final-highest-flag" src="/assets/flags/co.png" alt="Country" />
+                  </div>
+                  <div class="highest-nation-info">
+                    <span id="final-highest-name" class="highest-nation-name">Colombia</span>
+                    <span id="final-highest-tier" class="highest-nation-tier">Tier 1</span>
+                  </div>
+                </div>
               </div>
 
               <div class="modal-best-group">

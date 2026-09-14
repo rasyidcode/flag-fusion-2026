@@ -333,6 +333,112 @@ html, body {
   color: #ffd700;
 }
 
+/* Hidden Utility */
+.hidden {
+  display: none !important;
+}
+
+/* New Record Badge Celebration */
+.new-record-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.25) 0%, rgba(255, 152, 0, 0.25) 100%);
+  border: 1.5px solid #ffd700;
+  border-radius: 20px;
+  padding: 4px 14px;
+  color: #ffd700;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.4);
+  animation: recordPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes recordPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 14px rgba(255, 215, 0, 0.4);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 24px rgba(255, 215, 0, 0.7);
+  }
+}
+
+.record-sparkle {
+  font-size: 13px;
+}
+
+/* Highest Nation Reached Group */
+.modal-highest-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.modal-highest-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 1px;
+}
+
+.modal-highest-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 18px;
+  padding: 8px 16px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.highest-flag-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.highest-flag-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.highest-nation-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.highest-nation-name {
+  font-size: 15px;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.highest-nation-tier {
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffd700;
+  letter-spacing: 0.5px;
+}
+
 /* Play Again Button */
 .play-again-btn {
   background: linear-gradient(135deg, #ffd700 0%, #ff9800 100%);
@@ -564,5 +670,15 @@ html, body {
 
   .evo-arrow {
     font-size: 11px;
+  }
+
+  .game-over-card {
+    width: 280px;
+    padding: 20px 22px;
+    gap: 12px;
+  }
+
+  .modal-score-val {
+    font-size: 38px;
   }
 }

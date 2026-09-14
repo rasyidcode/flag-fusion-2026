@@ -26,6 +26,8 @@ export class Game extends Scene {
 
     unlockedLevels: Set<number> = new Set();
 
+    isNewRecord: boolean = false;
+
     constructor() {
         super('Game');
     }
@@ -40,6 +42,7 @@ export class Game extends Scene {
         this.dangerTimer = 0;
         this.dangerLine = null;
         this.unlockedLevels = new Set();
+        this.isNewRecord = false;
 
         // Load high scorere from local storage
         const savedBest = localStorage.getItem('flag_fusion_2026_highscore');
@@ -119,7 +122,10 @@ export class Game extends Scene {
                 const b = pair.bodyB.gameObject;
 
                 if (a instanceof Ball && b instanceof Ball) {
-                    this.mergeBalls(a, b);
+                    if (a.level === b.level && !a.merged && !b.merged) {
+                        this.mergeBalls(a, b);
+                        continue;
+                    }
                 }
 
                 if (a instanceof Ball || b instanceof Ball) {
@@ -227,6 +233,8 @@ export class Game extends Scene {
         soundManager.playDrop();
 
         this.time.delayedCall(650, () => {
+            if (this.isGameOver) return;
+
             const clampedX = PhaserMath.Clamp(
                 rawX,
                 15 + radius,
@@ -342,6 +350,7 @@ export class Game extends Scene {
 
         if (this.score > this.highScore) {
             this.highScore = this.score;
+            this.isNewRecord = true;
             const bestEl = document.getElementById('best-display');
             if (bestEl) bestEl.textContent = this.highScore.toString();
             localStorage.setItem('flag_fusion_2026_highscore', this.highScore.toString());
@@ -364,6 +373,27 @@ export class Game extends Scene {
 
             const finalBestEl = document.getElementById('final-best');
             if (finalBestEl) finalBestEl.textContent = this.highScore.toString();
+
+            const recordBadge = document.getElementById('new-record-badget');
+            if (recordBadge) {
+                recordBadge.classList.toggle('hidden', !this.isNewRecord);
+            }
+
+            const highestLevel = this.unlockedLevels.size > 0
+                ? Math.max(...this.unlockedLevels) : 1;
+            const highestDef = BALL_DEFINITIONS.find((b) => b.level == highestLevel) || BALL_DEFINITIONS[0];
+
+            const flagEl = document.getElementById('final-highest-flag') as HTMLImageElement | null;
+            if (flagEl) {
+                flagEl.src = `/assets/flags/${highestDef.code}.png`;
+                flagEl.alt = highestDef.name;
+            }
+
+            const nameEl = document.getElementById('final-highest-name');
+            if (nameEl) nameEl.textContent = highestDef.name;
+
+            const tierEl = document.getElementById('final-highest-tier');
+            if (tierEl) tierEl.textContent = `Tier ${highestDef.level}`;
 
             modal.classList.add('visible');
         }
