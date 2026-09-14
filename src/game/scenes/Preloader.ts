@@ -1,6 +1,5 @@
 import { Display, Scene } from "phaser";
 import { BALL_DEFINITIONS, DROP_Y, GAME_HEIGHT, GAME_WIDTH } from "../config.ts";
-import { BALL_DEFINITION_FIT } from "../types.ts";
 
 export class Preloader extends Scene {
     constructor() {
@@ -51,25 +50,29 @@ export class Preloader extends Scene {
 
             const flagImage = this.textures.get(`flag-${ballDef.code}`).getSourceImage() as HTMLImageElement;
             if (flagImage) {
-                if (ballDef.fit === BALL_DEFINITION_FIT.NORMAL) {
-                    ctx.drawImage(flagImage, 0, 0, flagImage.width, flagImage.height, 0, 0, diameter, diameter);
-                } else if (ballDef.fit === BALL_DEFINITION_FIT.COVER) {
-                    // object-fit: cover
-                    const scale = Math.max(
-                        diameter / flagImage.width,
-                        diameter / flagImage.height
-                    );
+                const scale = Math.max(
+                    diameter / flagImage.width,
+                    diameter / flagImage.height
+                );
 
-                    const width = flagImage.width * scale;
-                    const height = flagImage.height * scale;
+                const width = flagImage.width * scale;
+                const height = flagImage.height * scale;
 
-                    const x = (diameter - width) / 2;
-                    const y = (diameter - height) / 2;
+                const x = (diameter - width) / 2;
+                const y = (diameter - height) / 2;
 
-                    ctx.drawImage(flagImage, x, y, width, height);
-                }
-
+                ctx.drawImage(flagImage, x, y, width, height);
             }
+
+            ctx.restore();
+
+            const borderWidth = Math.max(2, Math.round(ballDef.radius * 0.07));
+            ctx.beginPath();
+            ctx.arc(ballDef.radius, ballDef.radius, ballDef.radius - borderWidth / 2, 0, Math.PI * 2);
+
+            ctx.lineWidth = borderWidth;
+            ctx.strokeStyle = ballDef.level === 11 ? '#ffd700' : 'rgba(255, 255, 255, 0.5)';
+            ctx.stroke();
 
             canvasTexture.refresh();
         });

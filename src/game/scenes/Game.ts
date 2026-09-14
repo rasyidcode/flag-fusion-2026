@@ -374,7 +374,7 @@ export class Game extends Scene {
             const finalBestEl = document.getElementById('final-best');
             if (finalBestEl) finalBestEl.textContent = this.highScore.toString();
 
-            const recordBadge = document.getElementById('new-record-badget');
+            const recordBadge = document.getElementById('new-record-badge');
             if (recordBadge) {
                 recordBadge.classList.toggle('hidden', !this.isNewRecord);
             }

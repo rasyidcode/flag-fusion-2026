@@ -42,6 +42,7 @@ Welcome to **World Cup Suika** (formerly *Flag Fusion 2026*)! This document defi
 - **Physics**: Matter.js (2D rigid body physics integrated into Phaser)
 - **Language**: TypeScript (`~6.0.2`)
 - **Bundler / Dev Server**: Vite (`^8.0.12`)
+- **Package Manager / Runtime**: [Bun](https://bun.sh/) (`bun dev`, `bun run build`)
 - **Canvas Resolution**: `480 x 720` (fixed aspect ratio, scaled with `Phaser.Scale.FIT`)
 
 ### Repository Structure:
@@ -117,18 +118,23 @@ Based on 2026 World Cup finishers:
 - `Phaser.Scale.FIT` and `Phaser.Scale.CENTER_BOTH`.
 - `touch-action: none` and `overscroll-behavior: none` to prevent page scrolling/gestures.
 
+### 7. Game Over Modal Polish & Sound Polish (`Game.ts`, `index.html`, `src/style.css`)
+- **Highest Nation Reached**: Displays tournament peak milestone badge with circular flag avatar and tier tag.
+- **New Record Celebration**: Animated pulsating golden record banner (`#new-record-badge` with `@keyframes recordPulse`).
+- **Post-Game Over Spawn Guard**: Added `if (this.isGameOver) return;` inside `dropBall()` 650ms delay to prevent orphan balls.
+- **Merge Audio Clean-up**: Guarded `collisionstart` with `continue;` on actual fusions so bounce clack does not layer over the merge chime.
+- **Evolution Track Selector**: Corrected quote formatting in `querySelector('.evo-step[data-level="${level}"]')`.
+
 ---
 
-## 🎯 Next Steps & Bug Fix Checklist
+## 🎯 Next Steps & Future Backlog
 
-1. **Fix Line 551 in `Game.ts`**:
-   - Current: `document.querySelector('.evo-step[data-level="${level}]')`
-   - Fix: Add missing closing quote: `document.querySelector('.evo-step[data-level="${level}"]')`
-2. **Prevent Delayed Ball Spawn After Game Over**:
-   - In `dropBall()`, inside `delayedCall(650, () => { ... })`: add `if (this.isGameOver) return;`
-3. **Prevent Bounce Clack on Merges**:
-   - In `collisionstart`, add `continue;` when two balls merge so they don't simultaneously fire `playBounce()`.
-4. **Game Over Modal Polish**:
-   - Add **Highest Nation Reached** badge (with flag icon) and **New Record** celebration.
-5. **Tactical Nudge / Shake Button**:
-   - Add a Nudge button with 15s cooldown to dislodge wedged balls.
+1. **Typo Fix on Line 377 in `Game.ts`**:
+   - Current: `document.getElementById('new-record-badget')`
+   - Fix: Remove trailing 't' -> `document.getElementById('new-record-badge')`
+2. **Tactical Nudge / Shake Button**:
+   - Add a Nudge button with a 15-second cooldown timer to dislodge awkwardly wedged balls.
+   - **Impulse Physics**: Iterate through active settled balls and apply upward lift (`body.velocity.y -= 2.0`) and slight random horizontal force.
+   - **Visual & Audio**: Trigger a subtle camera micro-shake (`cameras.main.shake(120, 0.004)`) and soft bounce sound (`soundManager.playBounce(0.8)`).
+   - **UI Placement**: Frosted glass button with countdown timer either in the site header navbar (next to sound toggle) or as a floating action button near the container.
+
